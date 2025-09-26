@@ -5,16 +5,17 @@ import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.
 // --- ⚠️ ACTION REQUIRED: PASTE YOUR CREDENTIALS HERE ---
 // 1. Paste your Firebase project configuration here.
 const firebaseConfig = {
-  apiKey: "AIzaSyAiGkLA3M-YGARgmGieYcsgVsfdmF0sZUQ",
-  authDomain: "urja-power-monitor-2025.firebaseapp.com",
-  databaseURL: "https://urja-power-monitor-2025-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "urja-power-monitor-2025",
-  storageBucket: "urja-power-monitor-2025.firebasestorage.app",
-  messagingSenderId: "692578664929",
-  appId: "1:692578664929:web:ae56ba8691977795ea92a0"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    databaseURL: "YOUR_DATABASE_URL",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
 };
+
 // 2. Paste your Gemini API Key here.
-const GEMINI_API_KEY = "AIzaSyCk41lcad7d659M5_zHkU-25FchQhD3P_s";
+const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY";
 // -----------------------------------------------------------
 
 // --- DOM Elements ---
@@ -40,6 +41,7 @@ const ui = {
 };
 
 let currentSensorData = {};
+let firstDataReceived = false; // Flag to handle the initial load
 
 // --- Chart.js Initialization ---
 let consumptionChart;
@@ -137,13 +139,19 @@ try {
             updateDashboard(data);
             updateChart(data);
             
+            // --- FIX: Hide loader only on first successful data receipt ---
+            if (!firstDataReceived) {
+                hideLoaderAndShowContent();
+                firstDataReceived = true;
+            }
+
             if (ui.statusDot.classList.contains('bg-red-500')) {
                 ui.statusDot.classList.remove('bg-red-500', 'animate-pulse');
                 ui.statusDot.classList.add('bg-green-500');
                 ui.statusText.textContent = "Live Data Received";
             }
         } else {
-           handleConnectionError("No data received from ESP32 yet.");
+           handleConnectionError("Waiting for data from ESP32...");
         }
     }, (error) => {
          console.error("Firebase read failed: ", error);
@@ -244,12 +252,9 @@ function setLoading(isLoading) {
     ui.sendSpinner.classList.toggle('hidden', !isLoading);
 }
 
-// --- Page Load Logic ---
-document.addEventListener('DOMContentLoaded', () => {
-    initializeChart();
-
-    // Hide the loader and show the main content after the new, shorter animation
-    setTimeout(() => {
+// --- New Page Load Logic ---
+function hideLoaderAndShowContent() {
+    if (!ui.loader.classList.contains('hidden')) {
         ui.loader.classList.add('hidden');
         ui.mainContent.classList.add('visible');
         
@@ -258,6 +263,19 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.opacity = '1';
             el.style.transform = 'translateY(0)';
         });
-    }, 2500); // Reduced duration to match the faster animation
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeChart();
+
+    // Fallback timer: If no data is received after 8 seconds, hide loader and show error.
+    setTimeout(() => {
+        if (!firstDataReceived) {
+            console.warn("Firebase timeout. Hiding loader.");
+            handleConnectionError("Connection timeout. Check ESP32 & credentials.");
+            hideLoaderAndShowContent(); // Show main content even on failure
+        }
+    }, 8000); 
 });
 
