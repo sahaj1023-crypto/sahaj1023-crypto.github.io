@@ -3,117 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urja AI - Power Dashboard</title>
-    <!-- Tailwind CSS -->
+    <title>Urja Power Monitor</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Chart.js for graphs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <!-- Custom Stylesheet -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="text-slate-100">
+<body class="bg-gray-900 text-white">
 
-    <!-- Animated Aurora Background -->
-    <div class="aurora-background">
-        <div class="aurora-shape-1"></div>
-        <div class="aurora-shape-2"></div>
-        <div class="aurora-shape-3"></div>
-    </div>
-
-    <!-- Main Content -->
-    <div id="main-content" class="container mx-auto p-4 md:p-6 relative z-10">
+    <div class="container mx-auto p-4 md:p-8">
         <!-- Header -->
-        <header class="text-center mb-8 md:mb-12">
-            <h1 class="text-5xl md:text-6xl font-extrabold text-white drop-shadow-lg">
-                Urja AI Dashboard
-            </h1>
-            <p class="text-slate-300 text-lg mt-2">Your intelligent energy companion.</p>
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-cyan-400">Urja Power Monitor</h1>
+            <p class="text-gray-400 mt-2">Real-time ESP32 sensor data with a Gemini AI assistant.</p>
+            <div id="status-indicator" class="mt-4 flex items-center justify-center gap-2">
+                <div id="status-dot" class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+                <span id="status-text" class="text-gray-400">Connecting to Firebase...</span>
+            </div>
         </header>
 
-        <!-- Main Dashboard Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            <!-- Left Column: Gauges and KPIs -->
-            <div class="flex flex-col gap-6">
-                <!-- Voltage Gauge -->
-                <div class="glass-card">
-                    <h2 class="card-title">Voltage</h2>
-                    <div class="gauge-container">
-                        <svg viewBox="0 0 120 70" class="gauge-svg">
-                            <path class="gauge-bg" d="M10 60 A 50 50 0 0 1 110 60"></path>
-                            <path id="voltage-gauge-fg" class="gauge-fg" d="M10 60 A 50 50 0 0 1 10 60"></path>
-                            <g id="voltage-gauge-needle" class="gauge-needle">
-                                <polygon points="60,15 62,60 58,60" fill="#f0f0f0"/>
-                                <circle cx="60" cy="60" r="4" fill="#f0f0f0"/>
-                            </g>
-                        </svg>
-                        <div id="voltage" class="gauge-text">--- V</div>
-                    </div>
+        <!-- Data Dashboard -->
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Voltage -->
+            <div class="data-card p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-300">Voltage</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 </div>
-                 <!-- Current Gauge -->
-                <div class="glass-card">
-                    <h2 class="card-title">Current</h2>
-                    <div class="gauge-container">
-                        <svg viewBox="0 0 120 70" class="gauge-svg">
-                            <path class="gauge-bg" d="M10 60 A 50 50 0 0 1 110 60"></path>
-                            <path id="current-gauge-fg" class="gauge-fg" d="M10 60 A 50 50 0 0 1 10 60"></path>
-                             <g id="current-gauge-needle" class="gauge-needle">
-                                <polygon points="60,15 62,60 58,60" fill="#f0f0f0"/>
-                                <circle cx="60" cy="60" r="4" fill="#f0f0f0"/>
-                            </g>
-                        </svg>
-                        <div id="current" class="gauge-text">--- A</div>
-                    </div>
+                <p id="voltage" class="text-4xl font-bold mt-2">-.-- <span class="text-xl font-medium text-gray-400">V</span></p>
+            </div>
+            <!-- Current -->
+            <div class="data-card p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-300">Current</h2>
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V3m0 18v-3M5.636 5.636l-1.414-1.414m15.556 15.556l-1.414-1.414M19.778 5.636l-1.414 1.414M4.222 19.778l1.414-1.414M12 12a6 6 0 100-12 6 6 0 000 12z" /></svg>
                 </div>
-                <!-- KPI Cards -->
-                <div class="glass-card grid grid-cols-2 gap-4 text-center">
-                    <div>
-                        <h3 class="kpi-title">Cost</h3>
-                        <p id="cost" class="kpi-value">--.--</p>
-                    </div>
-                    <div>
-                        <h3 class="kpi-title">Energy</h3>
-                        <p id="energy" class="kpi-value">--.--</p>
-                    </div>
+                <p id="current" class="text-4xl font-bold mt-2">-.-- <span class="text-xl font-medium text-gray-400">A</span></p>
+            </div>
+            <!-- Power -->
+            <div class="data-card p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-300">Power</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
+                <p id="power" class="text-4xl font-bold mt-2">-.-- <span class="text-xl font-medium text-gray-400">W</span></p>
+            </div>
+            <!-- Energy -->
+            <div class="data-card p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-300">Energy</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l-3 3m6 0l-3 3m0 10l3 3m-6 0l3 3M12 2v2M12 20v2m-7-11H3m18 0h-2" /></svg>
+                </div>
+                <p id="energy" class="text-4xl font-bold mt-2">-.-- <span class="text-xl font-medium text-gray-400">kWh</span></p>
+            </div>
+            <!-- Cost -->
+            <div class="data-card p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-300">Cost</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01" /></svg>
+                </div>
+                <p id="cost" class="text-4xl font-bold mt-2">-.-- <span class="text-xl font-medium text-gray-400">Rs</span></p>
+            </div>
+            <!-- Limit -->
+            <div class="data-card p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-300">Energy Limit</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                </div>
+                <p id="limit" class="text-4xl font-bold mt-2">-.-- <span class="text-xl font-medium text-gray-400">kWh</span></p>
+                 <div id="overdrive-status" class="text-sm font-semibold mt-2 text-gray-500">Overdrive: OFF</div>
             </div>
 
-            <!-- Center Column: Main Power Chart -->
-            <div class="glass-card lg:col-span-2 min-h-[400px] flex flex-col">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="card-title">Real-time Power</h2>
-                    <div class="flex items-center">
-                        <div class="w-3 h-3 rounded-full bg-red-500 animate-pulse mr-2"></div>
-                        <span id="power" class="text-2xl font-bold text-white">--- W</span>
-                    </div>
+        </main>
+        
+        <!-- Gemini Chat Assistant -->
+        <section class="bg-gray-800 border border-gray-700 rounded-lg p-4 md:p-6">
+            <h2 class="text-2xl font-bold mb-4 text-cyan-300">Gemini Power Assistant</h2>
+            <div id="chat-container" class="h-80 overflow-y-auto mb-4 p-4 bg-gray-900 rounded-md space-y-4">
+                <!-- Chat messages will be appended here -->
+                <div class="p-3 rounded-lg bg-cyan-900/50 max-w-lg">
+                    <p class="font-semibold text-cyan-400">Gemini</p>
+                    <p class="text-gray-300">Hello! I'm your power assistant. Ask me anything about your current consumption, or for tips on saving energy!</p>
                 </div>
-                <div class="flex-grow">
-                    <canvas id="powerChart"></canvas>
-                </div>
-                <p id="timestamp" class="text-xs text-slate-400 text-center mt-2">Awaiting data...</p>
-            </div>
-
-        </div>
-
-        <!-- AI Chat Section -->
-        <div class="glass-card mt-6">
-            <h2 class="card-title mb-4">Chat with Urja AI</h2>
-            <div id="chat-history" class="h-64 overflow-y-auto mb-4 p-4 bg-slate-900/50 rounded-lg">
-                <div class="ai-message">Hello! How can I help you understand your energy usage today?</div>
             </div>
             <form id="chat-form" class="flex gap-4">
-                <input type="text" id="chat-input" placeholder="e.g., Is my current usage high?" class="flex-grow bg-slate-900/50 border border-slate-600 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all">
-                <button type="submit" id="chat-submit-btn" class="btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                <input type="text" id="chat-input" placeholder="Ask about your power usage..." class="flex-grow bg-gray-700 border border-gray-600 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition">
+                <button type="submit" id="chat-submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-6 rounded-md transition disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center">
+                    <span id="send-text">Send</span>
+                    <div id="send-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 </button>
             </form>
-        </div>
+        </section>
 
     </div>
 
-    <!-- JavaScript -->
+    <!-- Firebase and App Logic -->
     <script type="module" src="script.js"></script>
 </body>
 </html>

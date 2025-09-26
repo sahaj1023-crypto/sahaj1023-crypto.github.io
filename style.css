@@ -1,190 +1,23 @@
-/* Import Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #020617; /* Slate 950 */
-    overflow-x: hidden;
 }
-
-/* --- Animated Aurora Background --- */
-.aurora-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    overflow: hidden;
-    filter: blur(100px);
+.data-card {
+    background-color: #1a202c;
+    border: 1px solid #2d3748;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
-
-.aurora-shape {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.4;
+.data-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
-
-.aurora-shape-1 {
-    width: 500px;
-    height: 500px;
-    background-color: #38bdf8; /* Sky 500 */
-    top: -150px;
-    left: -150px;
-    animation: move1 20s infinite alternate;
+#chat-container::-webkit-scrollbar {
+    width: 8px;
 }
-
-.aurora-shape-2 {
-    width: 600px;
-    height: 600px;
-    background-color: #818cf8; /* Indigo 400 */
-    bottom: -200px;
-    right: -200px;
-    animation: move2 25s infinite alternate;
+#chat-container::-webkit-scrollbar-track {
+    background: #2d3748;
 }
-
-.aurora-shape-3 {
-    width: 400px;
-    height: 400px;
-    background-color: #c084fc; /* Purple 400 */
-    bottom: 50px;
-    left: 20%;
-    animation: move3 18s infinite alternate;
+#chat-container::-webkit-scrollbar-thumb {
+    background-color: #4a5568;
+    border-radius: 10px;
+    border: 2px solid #2d3748;
 }
-
-@keyframes move1 {
-    from { transform: translate(0, 0) rotate(0deg); }
-    to { transform: translate(100px, 150px) rotate(30deg); }
-}
-
-@keyframes move2 {
-    from { transform: translate(0, 0) rotate(0deg); }
-    to { transform: translate(-150px, -100px) rotate(-40deg); }
-}
-
-@keyframes move3 {
-    from { transform: translate(0, 0) rotate(0deg); }
-    to { transform: translate(50px, -100px) rotate(20deg); }
-}
-
-
-/* --- Glassmorphism Card --- */
-.glass-card {
-    background: rgba(15, 23, 42, 0.4); /* Slate 900 with alpha */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1.5rem;
-    padding: 1.5rem;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-
-/* --- UI Elements --- */
-.card-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #cbd5e1; /* Slate 300 */
-}
-
-.kpi-title {
-    color: #94a3b8; /* Slate 400 */
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-}
-
-.kpi-value {
-    font-size: 2.25rem;
-    font-weight: 700;
-    color: white;
-}
-
-.btn {
-    background-image: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
-    background-size: 200% auto;
-    color: white;
-    font-weight: bold;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-}
-
-.btn:hover {
-    background-position: right center;
-    transform: scale(1.05);
-}
-
-/* --- Gauge Styles --- */
-.gauge-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-.gauge-svg {
-    width: 100%;
-    max-width: 200px;
-}
-.gauge-bg {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.1);
-    stroke-width: 10;
-    stroke-linecap: round;
-}
-.gauge-fg {
-    fill: none;
-    stroke: url(#gauge-gradient);
-    stroke-width: 10;
-    stroke-linecap: round;
-    transition: stroke-dasharray 0.5s ease;
-}
-.gauge-needle {
-    transform-origin: 60px 60px;
-    transition: transform 0.5s ease-in-out;
-}
-.gauge-text {
-    position: absolute;
-    bottom: 5px;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: white;
-}
-
-/* --- Chatbot Styles --- */
-#chat-history {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-.user-message, .ai-message {
-    padding: 0.75rem 1rem;
-    border-radius: 1rem;
-    max-width: 80%;
-    line-height: 1.5;
-}
-.user-message {
-    background-color: #38bdf8;
-    color: white;
-    border-bottom-right-radius: 0;
-    align-self: flex-end;
-}
-.ai-message {
-    background-color: #334155; /* Slate 700 */
-    color: #e2e8f0; /* Slate 200 */
-    border-bottom-left-radius: 0;
-    align-self: flex-start;
-}
-#chat-submit-btn {
-    padding: 0.75rem;
-}
-
