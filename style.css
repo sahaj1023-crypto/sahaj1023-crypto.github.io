@@ -1,23 +1,167 @@
+:root {
+    --bg-dark: #0F172A; /* slate-900 */
+    --card-bg: rgba(30, 41, 59, 0.5); /* slate-800 with opacity */
+    --border-color: rgba(51, 65, 85, 0.5);
+    --glow-cyan: rgba(34, 211, 238, 0.4);
+    --glow-purple: rgba(192, 132, 252, 0.4);
+}
+
 body {
     font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    background-image: radial-gradient(circle at 1% 1%, rgba(34, 211, 238, 0.15) 0%, transparent 40%), 
+                      radial-gradient(circle at 99% 99%, rgba(192, 132, 252, 0.15) 0%, transparent 40%);
 }
+
+.header-title {
+    background: -webkit-linear-gradient(45deg, #22d3ee, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Glassmorphism Card Effect */
 .data-card {
-    background-color: #1a202c;
-    border: 1px solid #2d3748;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
+
 .data-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 0 15px var(--glow-cyan), 0 0 30px var(--glow-purple), 0 8px 25px rgba(0,0,0,0.4);
+    border-color: var(--glow-cyan);
 }
-#chat-container::-webkit-scrollbar {
-    width: 8px;
+
+.interactive-metric {
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
 }
-#chat-container::-webkit-scrollbar-track {
-    background: #2d3748;
+
+.data-card:hover .interactive-metric {
+    transform: scale(1.05);
+    text-shadow: 0 0 8px var(--glow-cyan), 0 0 12px rgba(255,255,255,0.5);
 }
-#chat-container::-webkit-scrollbar-thumb {
-    background-color: #4a5568;
-    border-radius: 10px;
-    border: 2px solid #2d3748;
+
+
+.card-title {
+    color: #94a3b8; /* slate-400 */
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-align: center;
 }
+
+/* Scrollbar styling for chat */
+#chat-container::-webkit-scrollbar { width: 6px; }
+#chat-container::-webkit-scrollbar-track { background: transparent; }
+#chat-container::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+
+/* --- Loading Animation --- */
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out 0.3s, visibility 0.5s ease-out 0.3s;
+}
+#loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lightning {
+    width: 100px;
+    height: 100px;
+    stroke: #ffffff;
+    stroke-width: 8;
+    fill: none;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    /* Smoother, longer draw animation. Glow starts after drawing is complete. */
+    animation: draw 1.8s ease-in-out forwards, glow 2.5s infinite alternate 1.8s;
+}
+
+.loader-text {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: 0.5em;
+    margin-left: 0.5em; /* Optical alignment for letter spacing */
+    margin-top: 20px;
+    color: #fff;
+    opacity: 0;
+    /* New animation that starts after the lightning is mostly drawn */
+    animation: fadeInPulse 2s 1.5s forwards;
+}
+
+@keyframes draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes glow {
+    from {
+        /* A slightly more subtle starting glow */
+        filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px var(--glow-cyan)) drop-shadow(0 0 12px var(--glow-cyan));
+    }
+    to {
+        filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 12px var(--glow-purple)) drop-shadow(0 0 16px var(--glow-purple));
+    }
+}
+
+/* New keyframe for a smoother text appearance and subtle pulse */
+@keyframes fadeInPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+        filter: drop-shadow(0 0 2px #fff);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+        filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 15px var(--glow-cyan));
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px var(--glow-purple));
+    }
+}
+
+
+/* --- Content Fade-in Animation --- */
+#main-content {
+    transition: opacity 0.6s ease-in;
+}
+
+#main-content.visible {
+    opacity: 1;
+}
+
+/* Card Load-in Animations */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animated {
+    animation: fadeInUp 0.5s ease-out forwards;
+    animation-delay: var(--delay, 0s);
+    opacity: 0; /* Initially hidden */
+}
+
