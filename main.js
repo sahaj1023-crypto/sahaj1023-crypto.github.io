@@ -140,11 +140,10 @@ function appendMessage(text, sender) {
 }
 
 /**
- * Handles the chat form submission.
- * @param {Event} e - The form submission event.
+ * This is the core logic for processing the chat input and calling the Gemini API.
+ * It's separated from the event handler for clarity.
  */
-async function handleChatSubmit(e) {
-    e.preventDefault();
+async function processAndSubmitChat() {
     const userInput = chatInput.value.trim();
     if (!userInput) return;
 
@@ -201,5 +200,15 @@ async function handleChatSubmit(e) {
     }
 }
 
-chatForm.addEventListener('submit', handleChatSubmit);
+/**
+ * Attaches an event listener to the form. When the form is submitted (by clicking the button or pressing Enter),
+ * this function prevents the default page reload and calls the chat processing logic.
+ */
+chatForm.addEventListener('submit', (event) => {
+    // This is the critical line that PREVENTS the page from reloading.
+    event.preventDefault();
+    
+    // Now, call the function that handles the chat logic.
+    processAndSubmitChat();
+});
 
