@@ -26,8 +26,6 @@ const ui = {
     voltage: document.getElementById('voltage'),
     current: document.getElementById('current'),
     power: document.getElementById('power'),
-    energy: document.getElementById('energy'),
-    cost: document.getElementById('cost'),
     limitText: document.getElementById('limit-text'),
     batteryFill: document.getElementById('battery-fill'),
     overdriveStatusIndicator: document.getElementById('overdrive-status-indicator'),
@@ -54,7 +52,6 @@ const ui = {
     aboutModalCloseBtn: document.getElementById('about-modal-close-btn'),
     chatCard: document.getElementById('chat-card'),
     chatFullscreenBtn: document.getElementById('chat-fullscreen-btn'),
-    dashboardGrid: document.getElementById('dashboard-grid'),
     limitCard: document.getElementById('limit-card'),
     promptSuggestions: document.getElementById('prompt-suggestions'),
 };
@@ -76,19 +73,57 @@ const initialData = {
 const chartData = {
     labels: [],
     datasets: [
-        { label: 'Energy (kWh)', data: [], borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.2)', yAxisID: 'y', fill: true, tension: 0.4 },
-        { label: 'Cost (Rs)', data: [], borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.2)', yAxisID: 'y1', fill: true, tension: 0.4 }
+        { 
+            label: 'Energy (kWh)', 
+            data: [], 
+            borderColor: 'var(--graph-line-1)', 
+            backgroundColor: 'rgba(163, 230, 53, 0.2)', 
+            yAxisID: 'y', 
+            fill: true, 
+            tension: 0.4,
+            borderWidth: 2.5,
+            pointRadius: 0,
+            pointHoverRadius: 6
+        },
+        { 
+            label: 'Cost (Rs)', 
+            data: [], 
+            borderColor: 'var(--graph-line-2)', 
+            backgroundColor: 'rgba(217, 70, 239, 0.2)', 
+            yAxisID: 'y1', 
+            fill: true, 
+            tension: 0.4,
+            borderWidth: 2.5,
+            pointRadius: 0,
+            pointHoverRadius: 6
+        }
     ]
 };
 
 let chartOptions = { // Use let to allow modification
     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
     scales: {
-        x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(55, 65, 81, 0.4)' } },
-        y: { type: 'linear', position: 'left', title: { display: true, text: 'Energy (kWh)', color: '#64748b' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(55, 65, 81, 0.4)' } },
-        y1: { type: 'linear', position: 'right', title: { display: true, text: 'Cost (Rs)', color: '#64748b' }, ticks: { color: '#9ca3af' }, grid: { drawOnChartArea: false } }
+        x: { 
+            title: { display: true, text: 'Time', color: 'var(--text-secondary)' },
+            ticks: { color: 'var(--text-secondary)' }, 
+            grid: { color: 'var(--grid-line-color)' } 
+        },
+        y: { 
+            type: 'linear', 
+            position: 'left', 
+            title: { display: true, text: 'Energy (kWh)', color: 'var(--text-secondary)' }, 
+            ticks: { color: 'var(--text-secondary)' }, 
+            grid: { color: 'var(--grid-line-color)' } 
+        },
+        y1: { 
+            type: 'linear', 
+            position: 'right', 
+            title: { display: true, text: 'Cost (Rs)', color: 'var(--text-secondary)' }, 
+            ticks: { color: 'var(--text-secondary)' }, 
+            grid: { drawOnChartArea: false } 
+        }
     },
-    plugins: { legend: { labels: { color: '#e5e7eb' } } }
+    plugins: { legend: { labels: { color: 'var(--text-primary)' } } }
 };
 
 function initializeCharts() {
@@ -105,7 +140,7 @@ function initializeCharts() {
 function updateCharts() {
     const MAX_DATA_POINTS = 30;
     const now = new Date();
-    const timeLabel = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    const timeLabel = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     
     chartData.labels.push(timeLabel);
     chartData.datasets[0].data.push(parseFloat(currentSensorData.energy));
@@ -140,9 +175,8 @@ function connectToESP32() {
                 const timestamp = Date.now();
                 currentSensorData = data;
                 dataHistory.push({ data, timestamp });
-                if (dataHistory.length > MAX_HISTORY_LENGTH) {
-                    dataHistory.shift();
-                }
+                if (dataHistory.length > MAX_HISTORY_LENGTH) dataHistory.shift();
+                
                 updateDashboard(data);
                 updateBatteryIndicator(data);
                 updateCharts();
@@ -179,9 +213,10 @@ function setConnectionState(state, message = '') {
     ui.connectBtnText.classList.remove('hidden');
     ui.connectSpinner.classList.add('hidden');
     ui.connectBtn.disabled = false;
-    ui.statusDot.className = 'w-2.5 h-2.5 rounded-full';
-
-    // Hide overdrive indicator unless connected
+    
+    ui.statusDot.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-red-500');
+    ui.statusDot.classList.add('bg-slate-600');
+    
     ui.overdriveStatusIndicator.classList.add('hidden');
 
     switch (state) {
@@ -189,7 +224,7 @@ function setConnectionState(state, message = '') {
             ui.connectBtn.disabled = true;
             ui.connectBtnText.classList.add('hidden');
             ui.connectSpinner.classList.remove('hidden');
-            ui.statusDot.classList.add('bg-yellow-500', 'animate-pulse');
+            ui.statusDot.classList.add('bg-yellow-500');
             ui.statusText.textContent = "Connecting...";
             break;
         case 'connected':
@@ -199,30 +234,25 @@ function setConnectionState(state, message = '') {
             ui.statusText.textContent = "Live Data Received";
             break;
         case 'disconnected':
-            ui.statusDot.classList.add('bg-slate-600');
             ui.statusText.textContent = "Disconnected";
             break;
         case 'error':
-            ui.statusDot.classList.add('bg-red-500', 'animate-pulse');
+            ui.statusDot.classList.add('bg-red-500');
             ui.statusText.textContent = message || "Connection Failed";
             break;
     }
 }
 
 function updateDashboard(data) {
-    ui.power.textContent = `${parseFloat(data.power).toFixed(2)}`;
-    ui.voltage.textContent = `${parseFloat(data.voltage).toFixed(2)}`;
-    ui.current.textContent = `${parseFloat(data.current).toFixed(3)}`;
+    ui.power.textContent = parseFloat(data.power).toFixed(2);
+    ui.voltage.textContent = parseFloat(data.voltage).toFixed(2);
+    ui.current.textContent = parseFloat(data.current).toFixed(3);
     
-    // Update main tiles
-    const energyTile = document.querySelector('[data-metric="energy"]');
-    if (energyTile) {
-        energyTile.querySelector('.metric-value').textContent = parseFloat(data.energy).toFixed(4);
-    }
-    const costTile = document.querySelector('[data-metric="cost"]');
-    if(costTile) {
-        costTile.querySelector('.metric-value').textContent = parseFloat(data.cost).toFixed(2);
-    }
+    const energyTile = document.querySelector('[data-metric="energy"] .metric-value');
+    if (energyTile) energyTile.textContent = parseFloat(data.energy).toFixed(4);
+    
+    const costTile = document.querySelector('[data-metric="cost"] .metric-value');
+    if(costTile) costTile.textContent = parseFloat(data.cost).toFixed(2);
 }
 
 function updateBatteryIndicator(data) {
@@ -230,10 +260,7 @@ function updateBatteryIndicator(data) {
     const limit = parseFloat(data.limit);
 
     if (isNaN(energy) || isNaN(limit) || limit <= 0) {
-        ui.batteryFill.style.width = '0%';
-        ui.limitText.textContent = `${isNaN(energy) ? '-.--' : energy.toFixed(4)} / ${isNaN(limit) ? '-.--' : limit.toFixed(2)} kWh`;
-        ui.limitCard.classList.remove('aura-medium', 'aura-high');
-        ui.limitCard.classList.add('aura-low');
+        resetBatteryIndicator();
         return;
     }
 
@@ -241,7 +268,6 @@ function updateBatteryIndicator(data) {
     ui.batteryFill.style.width = `${Math.min(percentage, 100)}%`;
     ui.limitText.textContent = `${energy.toFixed(4)} / ${limit.toFixed(2)} kWh`;
 
-    // Update color based on percentage
     ui.batteryFill.classList.remove('state-low', 'state-medium', 'state-high');
     ui.limitCard.classList.remove('aura-low', 'aura-medium', 'aura-high');
     
@@ -256,13 +282,10 @@ function updateBatteryIndicator(data) {
         ui.limitCard.classList.add('aura-low');
     }
 
-    // Update overdrive status indicator
     if (data.overdrive) {
         ui.overdriveStatusIndicator.classList.remove('hidden');
-        ui.overdriveStatusIndicator.classList.add('flex');
     } else {
         ui.overdriveStatusIndicator.classList.add('hidden');
-        ui.overdriveStatusIndicator.classList.remove('flex');
     }
 }
 
@@ -280,7 +303,7 @@ function resetBatteryIndicator() {
 // --- Gemini Chat Logic ---
 ui.chatForm.addEventListener('submit', async (e) => { e.preventDefault(); const userInput = ui.chatInput.value.trim(); if (!userInput) return; if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") { addMessageToChat("Error", "Gemini API key is missing.", true); return; } addMessageToChat("You", userInput, false); ui.chatInput.value = ''; setLoading(true); try { const sensorDataContext = JSON.stringify(currentSensorData, null, 2); const fullPrompt = `Based on the following real-time data from an ESP32 power monitor, answer the user's question.\n\nSensor Data:\n${sensorDataContext}\n\nUser Question: "${userInput}"`; const systemPrompt = "You are a helpful power management assistant named Elyra AI. Analyze the provided real-time data to answer user questions concisely. Provide suggestions to save energy or explain the current power consumption. If the question is not related to power, act as a general conversational AI. Format your response using simple markdown for readability."; const response = await callGeminiApi(fullPrompt, systemPrompt); addMessageToChat("Gemini", response, true); } catch (error) { console.error("Gemini API Error:", error); addMessageToChat("Error", `Could not connect to the Gemini API.\nReason: ${error.message}`, true); } finally { setLoading(false); } });
 async function callGeminiApi(prompt, systemPrompt) { const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`; const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } }; const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) { let errorMessage = `API request failed with status ${response.status}`; try { const errorBody = await response.json(); errorMessage = errorBody.error?.message || JSON.stringify(errorBody); } catch (e) { errorMessage += `\nResponse: ${await response.text()}`; } throw new Error(errorMessage); } const data = await response.json(); return data.candidates[0].content.parts[0].text; }
-function addMessageToChat(sender, message, isAI) { const messageDiv = document.createElement('div'); const senderName = isAI ? 'Gemini' : 'You'; const senderNameColor = isAI ? 'text-cyan-400' : 'text-slate-300'; messageDiv.className = `p-3 max-w-lg text-sm ${isAI ? 'chat-ai' : 'chat-user ml-auto'}`; messageDiv.innerHTML = `<p class="font-semibold ${senderNameColor} mb-1">${senderName}</p><p class="text-text-primary whitespace-pre-wrap">${message}</p>`; ui.chatContainer.appendChild(messageDiv); ui.chatContainer.scrollTop = ui.chatContainer.scrollHeight; }
+function addMessageToChat(sender, message, isAI) { const messageDiv = document.createElement('div'); const senderName = isAI ? 'Elyra' : 'You'; const senderNameColor = isAI ? 'text-cyan-400' : 'text-slate-300'; messageDiv.className = `p-3 max-w-lg text-sm ${isAI ? 'chat-ai' : 'chat-user ml-auto'}`; messageDiv.innerHTML = `<p class="font-semibold" style="color: ${isAI ? 'var(--accent-cyan)' : 'var(--accent-purple)'};">${senderName}</p><p class="text-text-primary whitespace-pre-wrap">${message}</p>`; ui.chatContainer.appendChild(messageDiv); ui.chatContainer.scrollTop = ui.chatContainer.scrollHeight; }
 function setLoading(isLoading) { ui.chatSubmit.disabled = isLoading; ui.sendText.classList.toggle('hidden', isLoading); ui.sendSpinner.classList.toggle('hidden', !isLoading); }
 
 // --- Modal and Graph Interaction Logic ---
@@ -288,12 +311,7 @@ function showHistoryModal(metric, title) {
     ui.modalTitle.textContent = title;
     const historyBody = ui.modalBody;
     historyBody.innerHTML = '';
-
-    const filteredHistory = dataHistory
-        .map(entry => ({ value: entry.data[metric], timestamp: entry.timestamp }))
-        .filter(entry => entry.value !== undefined)
-        .reverse();
-
+    const filteredHistory = dataHistory.map(e => ({ value: e.data[metric], ts: e.timestamp })).filter(e => e.value !== undefined).reverse();
     if (filteredHistory.length === 0) {
         historyBody.innerHTML = '<p class="text-text-secondary text-center">No history to display yet. Waiting for live data...</p>';
     } else {
@@ -303,15 +321,13 @@ function showHistoryModal(metric, title) {
         const tbody = document.createElement('tbody');
         filteredHistory.forEach(item => {
             const row = document.createElement('tr');
-            const value = typeof item.value === 'number' ? item.value.toFixed(4) : item.value;
-            const time = new Date(item.timestamp).toLocaleTimeString();
-            row.innerHTML = `<td>${value}</td><td class="timestamp">${time}</td>`;
+            const val = typeof item.value === 'number' ? item.value.toFixed(4) : item.value;
+            row.innerHTML = `<td>${val}</td><td class="timestamp">${new Date(item.ts).toLocaleTimeString()}</td>`;
             tbody.appendChild(row);
         });
         table.appendChild(tbody);
         historyBody.appendChild(table);
     }
-
     ui.historyModalOverlay.classList.remove('hidden');
     setTimeout(() => ui.historyModalOverlay.classList.add('visible'), 10);
 }
@@ -323,12 +339,7 @@ function hideHistoryModal() {
 
 function showGraphModal() {
     ui.graphModalOverlay.classList.remove('hidden');
-    setTimeout(() => {
-        ui.graphModalOverlay.classList.add('visible');
-        if (expandedConsumptionChart) {
-            expandedConsumptionChart.resize();
-        }
-    }, 10);
+    setTimeout(() => { ui.graphModalOverlay.classList.add('visible'); if (expandedConsumptionChart) expandedConsumptionChart.resize(); }, 10);
 }
 
 function hideGraphModal() {
@@ -349,29 +360,29 @@ function hideAboutModal() {
 
 // --- Theme Management ---
 function updateChartTheme() {
-    const isLightMode = document.body.classList.contains('light-mode');
-    const textColor = isLightMode ? '#475569' : '#9ca3af';
-    const gridColor = isLightMode ? 'rgba(203, 213, 225, 0.5)' : 'rgba(55, 65, 81, 0.4)';
-    const legendColor = isLightMode ? '#1e293b' : '#e5e7eb';
-
+    const isLight = document.body.classList.contains('light-mode');
+    const style = getComputedStyle(document.body);
     const newOptions = { ...chartOptions };
+    
+    const textColor = style.getPropertyValue('--text-secondary').trim();
+    const gridColor = style.getPropertyValue('--grid-line-color').trim();
+    const legendColor = style.getPropertyValue('--text-primary').trim();
+
     newOptions.scales.x.ticks.color = textColor;
     newOptions.scales.x.grid.color = gridColor;
+    newOptions.scales.x.title.color = textColor;
+    
     newOptions.scales.y.ticks.color = textColor;
     newOptions.scales.y.grid.color = gridColor;
     newOptions.scales.y.title.color = textColor;
+    
     newOptions.scales.y1.ticks.color = textColor;
     newOptions.scales.y1.title.color = textColor;
+    
     newOptions.plugins.legend.labels.color = legendColor;
 
-    if (consumptionChart) {
-        consumptionChart.options = newOptions;
-        consumptionChart.update();
-    }
-    if (expandedConsumptionChart) {
-        expandedConsumptionChart.options = newOptions;
-        expandedConsumptionChart.update();
-    }
+    if (consumptionChart) { consumptionChart.options = newOptions; consumptionChart.update('none'); }
+    if (expandedConsumptionChart) { expandedConsumptionChart.options = newOptions; expandedConsumptionChart.update('none'); }
 }
 
 // --- Page Load Logic ---
@@ -380,12 +391,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDashboard(initialData);
     resetBatteryIndicator();
 
-    // Theme setup
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-    }
-    updateChartTheme(); // Update chart on initial load
+    if (savedTheme === 'light') document.body.classList.add('light-mode');
+    updateChartTheme(); 
 
     ui.themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('light-mode');
@@ -395,40 +403,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     setTimeout(() => {
-        if (ui.loader) {
-            ui.loader.classList.add('hidden');
-        }
-        if (ui.mainContent) {
-            ui.mainContent.classList.add('visible');
-        }
+        if (ui.loader) ui.loader.classList.add('hidden');
+        if (ui.mainContent) ui.mainContent.classList.add('visible');
         document.querySelectorAll('.animated').forEach(el => {
             el.style.opacity = '1';
             el.style.transform = 'translateY(0)';
         });
     }, 2500);
 
-    // Connection button listeners
     ui.connectBtn.addEventListener('click', connectToESP32);
     ui.disconnectBtn.addEventListener('click', disconnectFromESP32);
 
-    // Chat fullscreen listener
     ui.chatFullscreenBtn.addEventListener('click', () => {
-        ui.chatCard.classList.toggle('chat-fullscreen');
+        const chatCard = ui.chatCard;
+        if (!chatCard.classList.contains('chat-fullscreen')) {
+             // Store original position
+            const rect = chatCard.getBoundingClientRect();
+            chatCard.style.setProperty('--og-left', `${rect.left}px`);
+            chatCard.style.setProperty('--og-top', `${rect.top}px`);
+            chatCard.style.setProperty('--og-width', `${rect.width}px`);
+            chatCard.style.setProperty('--og-height', `${rect.height}px`);
+        }
+        chatCard.classList.toggle('chat-fullscreen');
         document.body.classList.toggle('chat-fullscreen-active');
     });
     
-    // Prompt suggestion listeners
     ui.promptSuggestions.addEventListener('click', (e) => {
         if (e.target.classList.contains('prompt-button')) {
-            const promptText = e.target.textContent;
+            const promptText = e.target.textContent.replace(/"/g, '');
             ui.chatInput.value = promptText;
             ui.chatForm.requestSubmit();
         }
     });
 
-    // Data card listeners
-    const interactiveCards = document.querySelectorAll('[data-metric]');
-    interactiveCards.forEach(card => {
+    document.querySelectorAll('[data-metric]').forEach(card => {
         card.addEventListener('click', (event) => {
             const metricTarget = event.target.closest('[data-metric]');
             if (metricTarget) {
@@ -439,24 +447,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Graph card listener
     ui.chartCard.addEventListener('click', showGraphModal);
-
-    // About nav listener
     ui.aboutNavBtn.addEventListener('click', showAboutModal);
 
     // Modal close listeners
     ui.modalCloseBtn.addEventListener('click', hideHistoryModal);
-    ui.historyModalOverlay.addEventListener('click', (e) => {
-        if (e.target === ui.historyModalOverlay) hideHistoryModal();
-    });
+    ui.historyModalOverlay.addEventListener('click', (e) => { if (e.target === ui.historyModalOverlay) hideHistoryModal(); });
     ui.graphModalCloseBtn.addEventListener('click', hideGraphModal);
-    ui.graphModalOverlay.addEventListener('click', (e) => {
-        if (e.target === ui.graphModalOverlay) hideGraphModal();
-    });
+    ui.graphModalOverlay.addEventListener('click', (e) => { if (e.target === ui.graphModalOverlay) hideGraphModal(); });
     ui.aboutModalCloseBtn.addEventListener('click', hideAboutModal);
-    ui.aboutModalOverlay.addEventListener('click', (e) => {
-        if (e.target === ui.aboutModalOverlay) hideAboutModal();
-    });
+    ui.aboutModalOverlay.addEventListener('click', (e) => { if (e.target === ui.aboutModalOverlay) hideAboutModal(); });
 });
 

@@ -94,7 +94,7 @@
                 <!-- Right Column (Graph) -->
                 <div id="chart-card" class="data-card p-4 md:p-6 animated" style="--delay: 0.1s;">
                     <h2 class="text-xl font-bold mb-4 text-text-secondary text-center">Consumption Over Time</h2>
-                    <div class="h-full pb-8">
+                    <div class="chart-container">
                         <canvas id="consumptionChart"></canvas>
                     </div>
                 </div>
@@ -141,7 +141,7 @@
                 <div class="chat-conversation-area">
                     <div id="chat-container" class="flex-grow overflow-y-auto mb-4 p-3 bg-background-end rounded-lg space-y-4">
                         <div class="p-3 max-w-lg chat-ai">
-                            <p class="font-semibold text-cyan-400">Gemini</p>
+                            <p class="font-semibold" style="color: var(--accent-cyan);">Elyra</p>
                             <p class="text-text-primary text-sm">Hello! Ask me about your power usage or for tips on saving energy!</p>
                         </div>
                     </div>
@@ -156,10 +156,10 @@
                 <div id="prompt-suggestions" class="prompt-suggestions-area">
                     <h3 class="text-lg font-semibold text-text-secondary mb-3">What can I help with?</h3>
                     <div class="space-y-2">
-                        <button class="prompt-button">Summarize my current usage.</button>
-                        <button class="prompt-button">How can I reduce my costs?</button>
-                        <button class="prompt-button">Explain what voltage means.</button>
-                        <button class="prompt-button">Is my power consumption high?</button>
+                        <button class="prompt-button">"Summarize my current usage."</button>
+                        <button class="prompt-button">"How can I reduce my costs?"</button>
+                        <button class="prompt-button">"Explain what voltage means."</button>
+                        <button class="prompt-button">"Is my power consumption high?"</button>
                     </div>
                 </div>
             </div>
