@@ -4,6 +4,11 @@
     --accent-purple: #8b5cf6;
     --accent-red-start: #f43f5e;
     --accent-red-end: #be123c;
+    --accent-yellow-start: #f59e0b;
+    --accent-yellow-end: #facc15;
+    --accent-green-start: #10b981;
+    --accent-green-end: #34d399;
+
 
     /* Default to Dark Mode */
     --background-start: #020617;
@@ -16,6 +21,7 @@
     --text-primary: #e5e7eb;
     --text-secondary: #9ca3af;
     --text-title: #64748b;
+    --text-shadow: rgba(0, 0, 0, 0.2);
     --grid-color: rgba(55, 65, 81, 0.4);
     --chat-input-bg: #374151; /* gray-700 */
     --chat-input-border: #4b5563; /* gray-600 */
@@ -25,28 +31,31 @@
     --toggle-border: #4b5563;
     --toggle-thumb-bg: var(--accent-cyan);
     --table-row-hover-bg: rgba(255, 255, 255, 0.05);
+    --nav-button-bg-hover: rgba(255, 255, 255, 0.1);
 }
 
 body.light-mode {
     --background-start: #f1f5f9;
     --background-end: #e2e8f0;
     --background-glow: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
-    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(241, 245, 249, 0.6));
+    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(241, 245, 249, 0.8));
     --card-border: rgba(203, 213, 225, 0.8);
     --card-shadow: rgba(99, 102, 241, 0.1);
     --card-shadow-hover: rgba(99, 102, 241, 0.2);
     --text-primary: #1e293b;
     --text-secondary: #475569;
     --text-title: #94a3b8;
+    --text-shadow: rgba(0, 0, 0, 0.1);
     --grid-color: rgba(203, 213, 225, 0.5);
     --chat-input-bg: #f8fafc; /* slate-50 */
-    --chat-input-border: #cbd5e1; /* slate-300 */
-    --chat-ai-bg: rgba(6, 182, 212, 0.1);
-    --chat-user-bg: rgba(226, 232, 240, 1);
+    --chat-input-border: #e2e8f0; /* slate-200 */
+    --chat-ai-bg: #ecfeff; /* light cyan */
+    --chat-user-bg: #f5f3ff; /* light violet */
     --toggle-bg: linear-gradient(135deg, #e2e8f0, #cbd5e1);
     --toggle-border: #cbd5e1;
     --toggle-thumb-bg: var(--accent-purple);
     --table-row-hover-bg: rgba(0, 0, 0, 0.03);
+    --nav-button-bg-hover: rgba(0, 0, 0, 0.05);
 }
 
 body {
@@ -58,15 +67,58 @@ body {
     overflow-x: hidden;
 }
 
-#dashboard-grid {
+#dashboard-layout {
     perspective: 1000px;
 }
+
+/* --- New Grid Layout --- */
+.dashboard-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr; /* Mobile first */
+}
+
+@media (min-width: 1024px) {
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr; /* Asymmetrical columns */
+        gap: 2rem;
+        align-items: start; /* Let columns have natural height */
+    }
+    .left-column {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    #chart-card {
+        min-height: 550px; 
+    }
+}
+
 
 .header-title {
     background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+/* New Nav Button Style */
+.nav-button {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.nav-button:hover {
+    color: var(--text-primary);
+    background-color: var(--nav-button-bg-hover);
 }
 
 /* Card Styles */
@@ -79,10 +131,16 @@ body {
                 box-shadow 0.4s ease, 
                 border-color 0.4s ease,
                 background 0.4s ease;
-    box-shadow: 0 4px 20px var(--card-shadow), inset 0 1px 1px rgba(255,255,255,0.05);
+    box-shadow: 0 4px 20px var(--card-shadow), 
+                inset 0 1px 1px rgba(255,255,255,0.05),
+                inset 0 0 10px rgba(0,0,0,0.2);
     position: relative;
     overflow: hidden;
     transform-style: preserve-3d;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 1.5rem; /* Softer rounded corners */
 }
 
 .data-card::before {
@@ -99,18 +157,82 @@ body {
 .data-card:hover::before { opacity: 0.1; }
 .data-card > * { position: relative; z-index: 1; transform: translateZ(20px); }
 
-.data-card:hover {
+/* Make only specific elements clickable */
+.data-card[data-metric]:hover, 
+#chart-card:hover {
     transform: translateY(-8px) rotateX(8deg) scale(1.04);
-    box-shadow: 0 15px 35px var(--card-shadow-hover), 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-purple), inset 0 1px 1px rgba(255,255,255,0.05);
+    box-shadow: 0 15px 35px var(--card-shadow-hover), 
+                0 0 20px var(--accent-cyan), 
+                0 0 40px var(--accent-purple), 
+                inset 0 1px 1px rgba(255,255,255,0.05),
+                inset 0 0 10px rgba(0,0,0,0.2);
     border-color: var(--accent-cyan);
 }
 
-.interactive-metric { transition: transform 0.3s ease, text-shadow 0.3s ease; }
-.data-card:hover .interactive-metric { 
-    transform: scale(1.05); 
-    text-shadow: 0 0 8px var(--accent-cyan), 0 0 20px var(--accent-purple); 
+/* --- Dynamic Aura for Limit Card --- */
+#limit-card.aura-low:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-green-start), 0 0 40px var(--accent-green-end), inset 0 1px 1px rgba(255,255,255,0.05), inset 0 0 10px rgba(0,0,0,0.2);
+    border-color: var(--accent-green-start);
+}
+#limit-card.aura-low:hover::before {
+    background-image: linear-gradient(135deg, var(--accent-green-start), var(--accent-green-end));
 }
 
+#limit-card.aura-medium:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-yellow-start), 0 0 40px var(--accent-yellow-end), inset 0 1px 1px rgba(255,255,255,0.05), inset 0 0 10px rgba(0,0,0,0.2);
+    border-color: var(--accent-yellow-start);
+}
+#limit-card.aura-medium:hover::before {
+    background-image: linear-gradient(135deg, var(--accent-yellow-start), var(--accent-yellow-end));
+}
+
+#limit-card.aura-high:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-red-start), 0 0 40px var(--accent-red-end), inset 0 1px 1px rgba(255,255,255,0.05), inset 0 0 10px rgba(0,0,0,0.2);
+    border-color: var(--accent-red-start);
+}
+#limit-card.aura-high:hover::before {
+    background-image: linear-gradient(135deg, var(--accent-red-start), var(--accent-red-end));
+}
+
+/* --- Responsive Typography --- */
+.metric-display, .metric-display-small {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-grow: 1;
+}
+.metric-value {
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
+    text-shadow: 0 2px 10px var(--text-shadow);
+}
+.metric-unit, .metric-unit-small {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* All left-column cards */
+.left-column .data-card {
+    min-height: 160px;
+}
+.left-column .metric-display .metric-value { font-size: clamp(2.5rem, 8vw, 4rem); }
+.left-column .metric-display .metric-unit { font-size: clamp(1rem, 3vw, 1.25rem); }
+
+/* Bottom row cards */
+.metric-display-small .metric-value { font-size: clamp(2rem, 8vw, 3.5rem); }
+.metric-display-small .metric-unit-small { font-size: clamp(0.875rem, 3vw, 1.25rem); }
+
+.data-card[data-metric]:hover .metric-value { 
+    transform: scale(1.05); 
+    text-shadow: 0 0 8px var(--accent-cyan), 0 0 20px var(--accent-purple), 0 2px 10px var(--text-shadow); 
+}
 
 .card-title {
     color: var(--text-title);
@@ -120,7 +242,52 @@ body {
     letter-spacing: 0.05em;
     text-align: center;
     transition: color 0.4s ease;
+    flex-shrink: 0;
 }
+
+/* --- Battery Indicator --- */
+.battery-container {
+    width: 100%;
+    height: 30px;
+    background-color: var(--background-end);
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
+    padding: 4px;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+.battery-container::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 16px;
+    background-color: var(--card-border);
+    border-radius: 0 3px 3px 0;
+    transition: background-color 0.5s ease;
+}
+.battery-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: 0%; /* Controlled by JS */
+    transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), background-image 0.8s ease, box-shadow 0.8s ease;
+}
+.battery-fill.state-low {
+    background-image: linear-gradient(90deg, var(--accent-green-start), var(--accent-green-end));
+    box-shadow: 0 0 15px var(--accent-green-start);
+}
+.battery-fill.state-medium {
+    background-image: linear-gradient(90deg, var(--accent-yellow-start), var(--accent-yellow-end));
+    box-shadow: 0 0 15px var(--accent-yellow-start);
+}
+.battery-fill.state-high {
+    background-image: linear-gradient(90deg, var(--accent-red-start), var(--accent-red-end));
+    box-shadow: 0 0 15px var(--accent-red-start);
+}
+
 
 /* Scrollbar styling */
 #chat-container::-webkit-scrollbar, #modal-body::-webkit-scrollbar { width: 6px; }
@@ -128,10 +295,53 @@ body {
 #chat-container::-webkit-scrollbar-thumb, #modal-body::-webkit-scrollbar-thumb { background-color: var(--text-title); border-radius: 10px; }
 
 /* Chat specific theme adjustments */
-#chat-container { background-color: var(--background-end); transition: background-color 0.5s ease; border-radius: 0.5rem; }
+.chat-main-area { display: grid; grid-template-columns: 1fr; gap: 1rem; flex-grow: 1; min-height: 0; }
+@media (min-width: 768px) {
+    .chat-main-area { grid-template-columns: 2fr 1fr; }
+}
+
+.chat-conversation-area { display: flex; flex-direction: column; min-height: 0; }
+#chat-container { background-color: var(--background-end); transition: background-color 0.5s ease; border-radius: 1rem; }
 #chat-input { background-color: var(--chat-input-bg); border-color: var(--chat-input-border); color: var(--text-primary); transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease; }
-.chat-ai { background-color: var(--chat-ai-bg); transition: background-color 0.5s ease; }
-.chat-user { background-color: var(--chat-user-bg); transition: background-color 0.5s ease; }
+.chat-ai { 
+    background-color: var(--chat-ai-bg); 
+    transition: background-color 0.5s ease;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 1rem;
+}
+.chat-user {
+    background-color: var(--chat-user-bg);
+    border: 1px solid var(--chat-input-border);
+    transition: background-color 0.5s ease, border-color 0.5s ease;
+    border-radius: 1rem;
+}
+.prompt-suggestions-area {
+    border-left: 1px solid var(--card-border);
+    padding-left: 1rem;
+    transition: border-color 0.4s ease;
+    display: none; /* Hidden on mobile */
+}
+@media (min-width: 768px) {
+    .prompt-suggestions-area { display: block; } /* Visible on desktop */
+}
+
+.prompt-button {
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem;
+    background-color: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+}
+.prompt-button:hover {
+    background-color: var(--chat-user-bg);
+    border-color: var(--accent-cyan);
+    color: var(--text-primary);
+}
 
 
 /* --- Text-only Loading Animation --- */
@@ -193,14 +403,22 @@ body {
 #main-content { transition: opacity 0.6s ease-in 0.2s; }
 #main-content.visible { opacity: 1; }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.animated { animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; animation-delay: var(--delay, 0s); opacity: 0; }
+.animated { 
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
+    animation-delay: var(--delay, 0s);
+    opacity: 0; 
+}
+
 
 /* Button Styles */
-.connect-button, .disconnect-button { font-weight: 600; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-image 0.2s ease; cursor: pointer; }
+.connect-button, .disconnect-button, #chat-submit { font-weight: 600; color: white; border: none;  border-radius: 1rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-image 0.2s ease; cursor: pointer; }
+.connect-button, .disconnect-button { padding: 0.75rem 1.5rem; }
 .connect-button { background-image: linear-gradient(45deg, var(--accent-cyan) 0%, var(--accent-purple) 100%); }
 .disconnect-button { background-image: linear-gradient(45deg, var(--accent-red-start) 0%, var(--accent-red-end) 100%); }
-.connect-button:hover, .disconnect-button:hover { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); transform: translateY(-2px); }
-.connect-button:active, .disconnect-button:active { transform: translateY(0) scale(0.98); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); filter: brightness(0.9); }
+.connect-button:hover, .disconnect-button:hover, #chat-submit:hover { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); transform: translateY(-2px); }
+.connect-button:active, .disconnect-button:active, #chat-submit:active { transform: translateY(0) scale(0.98); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); filter: brightness(0.9); }
+#chat-submit { background: var(--accent-cyan); }
+
 
 /* --- Modal Styles --- */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(10, 10, 20, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s 0.3s; }
@@ -208,8 +426,8 @@ body {
 .modal-box { 
     background: var(--card-bg); 
     border: 1px solid var(--card-border); 
-    border-radius: 1rem; 
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--card-border); 
+    border-radius: 1.5rem; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--card-border), 0 0 20px var(--accent-cyan); 
     width: 90%; max-width: 500px; max-height: 80vh; 
     display: flex; flex-direction: column; 
     transform: scale(0.95); 
@@ -218,11 +436,8 @@ body {
 .modal-overlay.visible .modal-box { transform: scale(1); }
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--card-border); flex-shrink: 0; transition: border-color 0.4s ease; }
 
-.modal-header h2 {
-    background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 700;
+.modal-header h2.header-title {
+    font-size: 1.25rem;
 }
 
 .modal-close-button { background: none; border: none; color: var(--text-secondary); font-size: 2rem; line-height: 1; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; }
@@ -247,7 +462,7 @@ body {
 .history-table .timestamp { color: var(--text-secondary); font-size: 0.9em; }
 
 /* Add cursor pointer to interactive cards */
-.data-card[data-metric], #chart-card { cursor: pointer; }
+.data-card[data-metric], #chart-card, #about-nav-btn { cursor: pointer; }
 
 /* Canvas must be positioned to fill the flexible modal body */
 .modal-body canvas {
@@ -304,4 +519,45 @@ body:not(.light-mode) .toggle-thumb .moon-icon { opacity: 0; transform: scale(0)
 /* Light mode: show moon, hide sun */
 body.light-mode .toggle-thumb .moon-icon { opacity: 1; transform: scale(1) rotate(0deg); }
 body.light-mode .toggle-thumb .sun-icon { opacity: 0; transform: scale(0) rotate(90deg); }
+
+
+/* --- Chat Fullscreen --- */
+.fullscreen-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+    padding: 4px;
+}
+.fullscreen-button:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+.fullscreen-button .minimize-icon { display: none; }
+.fullscreen-button .expand-icon { display: block; }
+
+#chat-card.chat-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    z-index: 5000;
+    padding: 2rem;
+    background: var(--background-end);
+}
+#chat-card.chat-fullscreen .fullscreen-button .minimize-icon { display: block; }
+#chat-card.chat-fullscreen .fullscreen-button .expand-icon { display: none; }
+
+/* FIX: This selector correctly hides the dashboard when chat is fullscreen */
+body.chat-fullscreen-active > #main-content > #main-header,
+body.chat-fullscreen-active > #main-content > #dashboard-layout {
+    visibility: hidden;
+}
+
+body.chat-fullscreen-active {
+    overflow: hidden;
+}
 

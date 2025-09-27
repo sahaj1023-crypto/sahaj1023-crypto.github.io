@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urja Power Monitor - Dashboard</title>
+    <title>Elyra Power Monitor - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,136 +12,158 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-background text-text-primary">
-
-    <!-- Theme Toggle Button -->
-    <button id="theme-toggle" title="Toggle theme" class="fixed top-4 right-4 z-50">
-        <div class="toggle-thumb">
-            <span class="sun-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            </span>
-            <span class="moon-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            </span>
-        </div>
-    </button>
     
     <!-- Loading Animation -->
     <div id="loader">
         <div class="loader-content">
-            <h1 class="loader-text">URJA</h1>
+            <h1 class="loader-text">ELYRA</h1>
         </div>
     </div>
 
-    <div id="main-content" class="container mx-auto p-4 md:p-6 opacity-0">
+    <div id="main-content" class="container mx-auto p-4 md:p-8 opacity-0">
         <!-- Header -->
-        <header class="text-center mb-10">
-            <div class="flex justify-center items-center gap-4 relative">
-                <h1 class="text-4xl md:text-5xl font-extrabold header-title">URJA DASHBOARD</h1>
+        <header id="main-header" class="mb-12">
+            <div class="flex justify-between items-center">
+                <div class="flex justify-center items-center gap-4 relative">
+                    <h1 class="text-3xl md:text-4xl font-extrabold header-title">ELYRA</h1>
+                </div>
+                <nav class="flex items-center gap-4">
+                    <button id="about-nav-btn" class="nav-button">About</button>
+                    <button id="theme-toggle" title="Toggle theme">
+                        <div class="toggle-thumb">
+                            <span class="sun-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                            </span>
+                            <span class="moon-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                            </span>
+                        </div>
+                    </button>
+                </nav>
             </div>
-            <div id="status-indicator" class="mt-4 flex items-center justify-center gap-2 text-sm">
-                <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
-                <span id="status-text" class="text-text-secondary">Disconnected</span>
-            </div>
-            <!-- Connection Buttons -->
-            <div id="connection-controls" class="mt-5">
-                <button id="connect-btn" class="connect-button">
-                    <span id="connect-btn-text">Connect to ESP32</span>
-                    <div id="connect-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
-                </button>
-                <button id="disconnect-btn" class="disconnect-button hidden">Disconnect</button>
+             <div class="text-center mt-8">
+                <div id="status-indicator" class="mt-4 flex items-center justify-center gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
+                        <span id="status-text" class="text-text-secondary">Disconnected</span>
+                    </div>
+                    <!-- Overdrive Status -->
+                    <div id="overdrive-status-indicator" class="hidden items-center gap-2">
+                        <div id="overdrive-dot" class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>
+                        <span id="overdrive-text" class="font-semibold text-green-400">Overdrive Active</span>
+                    </div>
+                </div>
+                <!-- Connection Buttons -->
+                <div id="connection-controls" class="mt-5">
+                    <button id="connect-btn" class="connect-button">
+                        <span id="connect-btn-text">Connect to ESP32</span>
+                        <div id="connect-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
+                    </button>
+                    <button id="disconnect-btn" class="disconnect-button hidden">Disconnect</button>
+                </div>
             </div>
         </header>
 
-        <div id="dashboard-grid" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <!-- Left Column: Key Metrics -->
-            <div class="lg:col-span-4 space-y-6">
-                <div class="data-card p-6 rounded-2xl animated" style="--delay: 0.1s;" data-metric="power" data-title="Live Power History">
-                    <h2 class="card-title">Live Power</h2>
-                    <div class="flex items-baseline justify-center gap-2 mt-2">
-                        <p id="power" class="text-6xl font-bold text-text-primary interactive-metric">-.--</p>
-                        <span class="text-3xl font-medium text-text-secondary">W</span>
+        <div id="dashboard-layout" class="space-y-8">
+            <div id="dashboard-grid" class="dashboard-grid">
+                <!-- Left Column -->
+                <div class="left-column">
+                    <div id="power-card" class="data-card p-6" data-metric="power" data-title="Live Power History">
+                        <h2 class="card-title">Live Power</h2>
+                        <div class="metric-display">
+                            <p id="power" class="metric-value">-.--</p>
+                            <span class="metric-unit">W</span>
+                        </div>
                     </div>
-                </div>
-                <div class="grid grid-cols-2 gap-6">
-                     <div class="data-card p-6 rounded-2xl animated" style="--delay: 0.2s;" data-metric="voltage" data-title="Voltage History">
+                    <div id="voltage-card" class="data-card p-6" data-metric="voltage" data-title="Voltage History">
                         <h2 class="card-title">Voltage</h2>
-                        <div class="flex items-baseline justify-center gap-2 mt-2">
-                            <p id="voltage" class="text-4xl font-bold text-text-primary interactive-metric">-.--</p>
-                            <span class="text-xl font-medium text-text-secondary">V</span>
+                        <div class="metric-display">
+                            <p id="voltage" class="metric-value">-.--</p>
+                            <span class="metric-unit">V</span>
                         </div>
                     </div>
-                     <div class="data-card p-6 rounded-2xl animated" style="--delay: 0.3s;" data-metric="current" data-title="Current History">
+                    <div id="current-card" class="data-card p-6" data-metric="current" data-title="Current History">
                         <h2 class="card-title">Current</h2>
-                         <div class="flex items-baseline justify-center gap-2 mt-2">
-                            <p id="current" class="text-4xl font-bold text-text-primary interactive-metric">-.--</p>
-                            <span class="text-xl font-medium text-text-secondary">A</span>
+                         <div class="metric-display">
+                            <p id="current" class="metric-value">-.--</p>
+                            <span class="metric-unit">A</span>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Center Column: Chart -->
-            <div class="lg:col-span-8 space-y-6">
-                <div id="chart-card" class="data-card p-4 md:p-6 rounded-2xl animated" style="--delay: 0.4s; height: 350px;">
-                    <h2 class="text-xl font-bold mb-4 text-text-secondary">Consumption Over Time</h2>
+                <!-- Right Column (Graph) -->
+                <div id="chart-card" class="data-card p-4 md:p-6 animated" style="--delay: 0.1s;">
+                    <h2 class="text-xl font-bold mb-4 text-text-secondary text-center">Consumption Over Time</h2>
                     <div class="h-full pb-8">
                         <canvas id="consumptionChart"></canvas>
                     </div>
                 </div>
             </div>
             
-            <!-- Summary Row -->
-            <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="data-card p-4 rounded-2xl animated text-center" style="--delay: 0.5s;" data-metric="energy" data-title="Total Energy History">
+            <!-- Bottom Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 animated" style="--delay: 0.3s;">
+                <div id="energy-card" class="data-card p-6 text-center" data-metric="energy" data-title="Total Energy History">
                     <h2 class="card-title">Total Energy</h2>
-                    <p id="energy" class="text-3xl font-bold mt-1 interactive-metric">-.-- <span class="text-lg font-medium text-text-secondary">kWh</span></p>
+                    <div class="metric-display-small">
+                        <p class="metric-value">-.--</p>
+                        <p class="metric-unit-small">kWh</p>
+                    </div>
                 </div>
-                <div class="data-card p-4 rounded-2xl animated text-center" style="--delay: 0.6s;" data-metric="cost" data-title="Total Cost History">
+                <div id="cost-card" class="data-card p-6 text-center" data-metric="cost" data-title="Total Cost History">
                     <h2 class="card-title">Total Cost</h2>
-                    <p id="cost" class="text-3xl font-bold mt-1 interactive-metric">-.-- <span class="text-lg font-medium text-text-secondary">Rs</span></p>
-                </div>
-                <div class="data-card p-4 rounded-2xl animated text-center" style="--delay: 0.7s;">
-                    <h2 class="card-title">Energy Limit</h2>
-                    <p id="limit" class="text-3xl font-bold mt-1 interactive-metric">-.-- <span class="text-lg font-medium text-text-secondary">kWh</span></p>
-                    <div id="overdrive-status" class="text-xs font-semibold mt-1 text-text-secondary">Overdrive: OFF</div>
+                    <div class="metric-display-small">
+                        <p class="metric-value">-.--</p>
+                        <p class="metric-unit-small">Rs</p>
+                    </div>
                 </div>
             </div>
 
-
-            <!-- Full Width Chat Section -->
-            <div class="lg:col-span-12">
-                 <section class="data-card rounded-2xl p-4 md:p-6 animated" style="--delay: 0.8s;">
-                    <h2 class="text-2xl font-bold mb-3 text-center header-title">Gemini Power Assistant</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2">
-                             <div id="chat-container" class="h-80 overflow-y-auto mb-4 p-3 bg-background-end rounded-lg space-y-4">
-                                <div class="p-3 rounded-lg bg-cyan-900/50 max-w-lg chat-ai">
-                                    <p class="font-semibold text-cyan-400">Gemini</p>
-                                    <p class="text-text-primary text-sm">Hello! Ask me about your power usage or for tips on saving energy!</p>
-                                </div>
-                            </div>
-                            <form id="chat-form" class="flex gap-2">
-                                <input type="text" id="chat-input" placeholder="Ask Urja AI..." class="flex-grow bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition text-sm">
-                                <button type="submit" id="chat-submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-5 rounded-lg transition disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center">
-                                    <span id="send-text">Send</span>
-                                    <div id="send-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                </button>
-                            </form>
-                        </div>
-                        <div class="md:col-span-1 text-center md:text-left text-text-secondary p-4 flex flex-col justify-center">
-                           <h3 class="font-bold text-lg text-text-primary mb-2">What can I help with?</h3>
-                           <ul class="text-sm space-y-2 list-none">
-                               <li>"Summarize my current usage."</li>
-                               <li>"How can I reduce my costs?"</li>
-                               <li>"Explain what voltage means."</li>
-                               <li>"Is my power consumption high?"</li>
-                           </ul>
-                        </div>
-                    </div>
-                </section>
+            <!-- Energy Limit Section -->
+            <div id="limit-card" class="data-card p-6 animated aura-low" style="--delay: 0.4s;">
+                <h2 class="card-title w-full mb-3 text-center">Energy Limit</h2>
+                <div class="battery-container">
+                    <div id="battery-fill" class="battery-fill state-low"></div>
+                </div>
+                <p id="limit-text" class="text-sm font-semibold text-text-secondary mt-3 text-center">-.-- / -.-- kWh</p>
             </div>
         </div>
+
+        <!-- AI Assistant Section -->
+        <section id="chat-card" class="data-card p-4 md:p-6 animated flex flex-col mt-8" style="--delay: 0.5s;">
+             <div class="flex justify-between items-center mb-3">
+                <h2 class="text-2xl font-bold text-center header-title">Elyra AI</h2>
+                <button id="chat-fullscreen-btn" class="fullscreen-button" title="Toggle fullscreen chat">
+                     <svg class="expand-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                     <svg class="minimize-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+                </button>
+            </div>
+            <div class="chat-main-area">
+                <div class="chat-conversation-area">
+                    <div id="chat-container" class="flex-grow overflow-y-auto mb-4 p-3 bg-background-end rounded-lg space-y-4">
+                        <div class="p-3 max-w-lg chat-ai">
+                            <p class="font-semibold text-cyan-400">Gemini</p>
+                            <p class="text-text-primary text-sm">Hello! Ask me about your power usage or for tips on saving energy!</p>
+                        </div>
+                    </div>
+                    <form id="chat-form" class="flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Ask Elyra AI..." class="flex-grow bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition text-sm">
+                        <button type="submit" id="chat-submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-5 rounded-lg transition disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center">
+                            <span id="send-text">Send</span>
+                            <div id="send-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        </button>
+                    </form>
+                </div>
+                <div id="prompt-suggestions" class="prompt-suggestions-area">
+                    <h3 class="text-lg font-semibold text-text-secondary mb-3">What can I help with?</h3>
+                    <div class="space-y-2">
+                        <button class="prompt-button">Summarize my current usage.</button>
+                        <button class="prompt-button">How can I reduce my costs?</button>
+                        <button class="prompt-button">Explain what voltage means.</button>
+                        <button class="prompt-button">Is my power consumption high?</button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
     <!-- Modal for Data History -->
@@ -169,6 +191,24 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal for About Elyra -->
+    <div id="about-modal-overlay" class="modal-overlay hidden">
+        <div id="about-modal" class="modal-box">
+            <div class="modal-header">
+                <h2 class="text-xl font-bold header-title">About Elyra</h2>
+                <button id="about-modal-close-btn" class="modal-close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                 <div class="text-center text-text-secondary space-y-4">
+                    <p class="text-lg italic">Elyra is more than just a project — it's a vision.</p>
+                    <p>Inspired by the brilliance of the Lyra constellation, Elyra symbolizes a new light in the journey toward sustainable energy. Our mission is to create smart, efficient, and eco-friendly solutions that reduce power consumption while empowering people to live greener lives.</p>
+                    <p>With Elyra, we combine innovation, technology, and sustainability to pave the way for a brighter and more energy-conscious future.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Firebase and App Logic -->
     <script type="module" src="script.js"></script>

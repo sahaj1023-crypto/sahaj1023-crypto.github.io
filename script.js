@@ -28,8 +28,9 @@ const ui = {
     power: document.getElementById('power'),
     energy: document.getElementById('energy'),
     cost: document.getElementById('cost'),
-    limit: document.getElementById('limit'),
-    overdrive: document.getElementById('overdrive-status'),
+    limitText: document.getElementById('limit-text'),
+    batteryFill: document.getElementById('battery-fill'),
+    overdriveStatusIndicator: document.getElementById('overdrive-status-indicator'),
     statusDot: document.getElementById('status-dot'),
     statusText: document.getElementById('status-text'),
     chatForm: document.getElementById('chat-form'),
@@ -48,6 +49,14 @@ const ui = {
     expandedChartCanvas: document.getElementById('expandedConsumptionChart'),
     graphModalCloseBtn: document.getElementById('graph-modal-close-btn'),
     themeToggle: document.getElementById('theme-toggle'),
+    aboutNavBtn: document.getElementById('about-nav-btn'),
+    aboutModalOverlay: document.getElementById('about-modal-overlay'),
+    aboutModalCloseBtn: document.getElementById('about-modal-close-btn'),
+    chatCard: document.getElementById('chat-card'),
+    chatFullscreenBtn: document.getElementById('chat-fullscreen-btn'),
+    dashboardGrid: document.getElementById('dashboard-grid'),
+    limitCard: document.getElementById('limit-card'),
+    promptSuggestions: document.getElementById('prompt-suggestions'),
 };
 
 // --- App State ---
@@ -135,6 +144,7 @@ function connectToESP32() {
                     dataHistory.shift();
                 }
                 updateDashboard(data);
+                updateBatteryIndicator(data);
                 updateCharts();
                 setConnectionState('connected');
             } else {
@@ -157,19 +167,22 @@ function disconnectFromESP32() {
     }
     setConnectionState('disconnected');
     updateDashboard(initialData);
+    resetBatteryIndicator();
     resetCharts();
     dataHistory = [];
 }
 
 // --- UI State Management ---
 function setConnectionState(state, message = '') {
-    // ... (This function is unchanged)
     ui.connectBtn.classList.remove('hidden');
     ui.disconnectBtn.classList.add('hidden');
     ui.connectBtnText.classList.remove('hidden');
     ui.connectSpinner.classList.add('hidden');
     ui.connectBtn.disabled = false;
     ui.statusDot.className = 'w-2.5 h-2.5 rounded-full';
+
+    // Hide overdrive indicator unless connected
+    ui.overdriveStatusIndicator.classList.add('hidden');
 
     switch (state) {
         case 'connecting':
@@ -200,17 +213,74 @@ function updateDashboard(data) {
     ui.power.textContent = `${parseFloat(data.power).toFixed(2)}`;
     ui.voltage.textContent = `${parseFloat(data.voltage).toFixed(2)}`;
     ui.current.textContent = `${parseFloat(data.current).toFixed(3)}`;
-    ui.energy.innerHTML = `${parseFloat(data.energy).toFixed(4)} <span class="text-lg font-medium text-text-secondary">kWh</span>`;
-    ui.cost.innerHTML = `${parseFloat(data.cost).toFixed(2)} <span class="text-lg font-medium text-text-secondary">Rs</span>`;
-    ui.limit.innerHTML = `${parseFloat(data.limit).toFixed(2)} <span class="text-lg font-medium text-text-secondary">kWh</span>`;
-    ui.overdrive.textContent = `Overdrive: ${data.overdrive ? 'ON' : 'OFF'}`;
-    ui.overdrive.className = `text-xs font-semibold mt-1 ${data.overdrive ? 'text-green-400' : 'text-slate-500'}`;
+    
+    // Update main tiles
+    const energyTile = document.querySelector('[data-metric="energy"]');
+    if (energyTile) {
+        energyTile.querySelector('.metric-value').textContent = parseFloat(data.energy).toFixed(4);
+    }
+    const costTile = document.querySelector('[data-metric="cost"]');
+    if(costTile) {
+        costTile.querySelector('.metric-value').textContent = parseFloat(data.cost).toFixed(2);
+    }
 }
 
+function updateBatteryIndicator(data) {
+    const energy = parseFloat(data.energy);
+    const limit = parseFloat(data.limit);
+
+    if (isNaN(energy) || isNaN(limit) || limit <= 0) {
+        ui.batteryFill.style.width = '0%';
+        ui.limitText.textContent = `${isNaN(energy) ? '-.--' : energy.toFixed(4)} / ${isNaN(limit) ? '-.--' : limit.toFixed(2)} kWh`;
+        ui.limitCard.classList.remove('aura-medium', 'aura-high');
+        ui.limitCard.classList.add('aura-low');
+        return;
+    }
+
+    const percentage = (energy / limit) * 100;
+    ui.batteryFill.style.width = `${Math.min(percentage, 100)}%`;
+    ui.limitText.textContent = `${energy.toFixed(4)} / ${limit.toFixed(2)} kWh`;
+
+    // Update color based on percentage
+    ui.batteryFill.classList.remove('state-low', 'state-medium', 'state-high');
+    ui.limitCard.classList.remove('aura-low', 'aura-medium', 'aura-high');
+    
+    if (percentage > 80) {
+        ui.batteryFill.classList.add('state-high');
+        ui.limitCard.classList.add('aura-high');
+    } else if (percentage > 50) {
+        ui.batteryFill.classList.add('state-medium');
+        ui.limitCard.classList.add('aura-medium');
+    } else {
+        ui.batteryFill.classList.add('state-low');
+        ui.limitCard.classList.add('aura-low');
+    }
+
+    // Update overdrive status indicator
+    if (data.overdrive) {
+        ui.overdriveStatusIndicator.classList.remove('hidden');
+        ui.overdriveStatusIndicator.classList.add('flex');
+    } else {
+        ui.overdriveStatusIndicator.classList.add('hidden');
+        ui.overdriveStatusIndicator.classList.remove('flex');
+    }
+}
+
+function resetBatteryIndicator() {
+    ui.limitText.textContent = `-.-- / -.-- kWh`;
+    ui.batteryFill.style.width = '0%';
+    ui.batteryFill.classList.remove('state-medium', 'state-high');
+    ui.batteryFill.classList.add('state-low');
+    ui.limitCard.classList.remove('aura-medium', 'aura-high');
+    ui.limitCard.classList.add('aura-low');
+    ui.overdriveStatusIndicator.classList.add('hidden');
+}
+
+
 // --- Gemini Chat Logic ---
-ui.chatForm.addEventListener('submit', async (e) => { e.preventDefault(); const userInput = ui.chatInput.value.trim(); if (!userInput) return; if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") { addMessageToChat("Error", "Gemini API key is missing.", true); return; } addMessageToChat("You", userInput, false); ui.chatInput.value = ''; setLoading(true); try { const sensorDataContext = JSON.stringify(currentSensorData, null, 2); const fullPrompt = `Based on the following real-time data from an ESP32 power monitor, answer the user's question.\n\nSensor Data:\n${sensorDataContext}\n\nUser Question: "${userInput}"`; const systemPrompt = "You are a helpful power management assistant named Urja AI. Analyze the provided real-time data to answer user questions concisely. Provide suggestions to save energy or explain the current power consumption. If the question is not related to power, act as a general conversational AI. Format your response using simple markdown for readability."; const response = await callGeminiApi(fullPrompt, systemPrompt); addMessageToChat("Gemini", response, true); } catch (error) { console.error("Gemini API Error:", error); addMessageToChat("Error", `Could not connect to the Gemini API.\nReason: ${error.message}`, true); } finally { setLoading(false); } });
+ui.chatForm.addEventListener('submit', async (e) => { e.preventDefault(); const userInput = ui.chatInput.value.trim(); if (!userInput) return; if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") { addMessageToChat("Error", "Gemini API key is missing.", true); return; } addMessageToChat("You", userInput, false); ui.chatInput.value = ''; setLoading(true); try { const sensorDataContext = JSON.stringify(currentSensorData, null, 2); const fullPrompt = `Based on the following real-time data from an ESP32 power monitor, answer the user's question.\n\nSensor Data:\n${sensorDataContext}\n\nUser Question: "${userInput}"`; const systemPrompt = "You are a helpful power management assistant named Elyra AI. Analyze the provided real-time data to answer user questions concisely. Provide suggestions to save energy or explain the current power consumption. If the question is not related to power, act as a general conversational AI. Format your response using simple markdown for readability."; const response = await callGeminiApi(fullPrompt, systemPrompt); addMessageToChat("Gemini", response, true); } catch (error) { console.error("Gemini API Error:", error); addMessageToChat("Error", `Could not connect to the Gemini API.\nReason: ${error.message}`, true); } finally { setLoading(false); } });
 async function callGeminiApi(prompt, systemPrompt) { const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`; const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } }; const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) { let errorMessage = `API request failed with status ${response.status}`; try { const errorBody = await response.json(); errorMessage = errorBody.error?.message || JSON.stringify(errorBody); } catch (e) { errorMessage += `\nResponse: ${await response.text()}`; } throw new Error(errorMessage); } const data = await response.json(); return data.candidates[0].content.parts[0].text; }
-function addMessageToChat(sender, message, isAI) { const messageDiv = document.createElement('div'); const senderName = isAI ? 'Gemini' : 'You'; const senderNameColor = isAI ? 'text-cyan-400' : 'text-slate-300'; messageDiv.className = `p-3 rounded-lg max-w-lg text-sm ${isAI ? 'chat-ai' : 'chat-user ml-auto'}`; messageDiv.innerHTML = `<p class="font-semibold ${senderNameColor} mb-1">${senderName}</p><p class="text-text-primary whitespace-pre-wrap">${message}</p>`; ui.chatContainer.appendChild(messageDiv); ui.chatContainer.scrollTop = ui.chatContainer.scrollHeight; }
+function addMessageToChat(sender, message, isAI) { const messageDiv = document.createElement('div'); const senderName = isAI ? 'Gemini' : 'You'; const senderNameColor = isAI ? 'text-cyan-400' : 'text-slate-300'; messageDiv.className = `p-3 max-w-lg text-sm ${isAI ? 'chat-ai' : 'chat-user ml-auto'}`; messageDiv.innerHTML = `<p class="font-semibold ${senderNameColor} mb-1">${senderName}</p><p class="text-text-primary whitespace-pre-wrap">${message}</p>`; ui.chatContainer.appendChild(messageDiv); ui.chatContainer.scrollTop = ui.chatContainer.scrollHeight; }
 function setLoading(isLoading) { ui.chatSubmit.disabled = isLoading; ui.sendText.classList.toggle('hidden', isLoading); ui.sendSpinner.classList.toggle('hidden', !isLoading); }
 
 // --- Modal and Graph Interaction Logic ---
@@ -266,6 +336,17 @@ function hideGraphModal() {
     setTimeout(() => ui.graphModalOverlay.classList.add('hidden'), 300);
 }
 
+function showAboutModal() {
+    ui.aboutModalOverlay.classList.remove('hidden');
+    setTimeout(() => ui.aboutModalOverlay.classList.add('visible'), 10);
+}
+
+function hideAboutModal() {
+    ui.aboutModalOverlay.classList.remove('visible');
+    setTimeout(() => ui.aboutModalOverlay.classList.add('hidden'), 300);
+}
+
+
 // --- Theme Management ---
 function updateChartTheme() {
     const isLightMode = document.body.classList.contains('light-mode');
@@ -297,6 +378,7 @@ function updateChartTheme() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeCharts();
     updateDashboard(initialData);
+    resetBatteryIndicator();
 
     // Theme setup
     const savedTheme = localStorage.getItem('theme');
@@ -313,8 +395,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     setTimeout(() => {
-        ui.loader.classList.add('hidden');
-        ui.mainContent.classList.add('visible');
+        if (ui.loader) {
+            ui.loader.classList.add('hidden');
+        }
+        if (ui.mainContent) {
+            ui.mainContent.classList.add('visible');
+        }
         document.querySelectorAll('.animated').forEach(el => {
             el.style.opacity = '1';
             el.style.transform = 'translateY(0)';
@@ -325,18 +411,39 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.connectBtn.addEventListener('click', connectToESP32);
     ui.disconnectBtn.addEventListener('click', disconnectFromESP32);
 
+    // Chat fullscreen listener
+    ui.chatFullscreenBtn.addEventListener('click', () => {
+        ui.chatCard.classList.toggle('chat-fullscreen');
+        document.body.classList.toggle('chat-fullscreen-active');
+    });
+    
+    // Prompt suggestion listeners
+    ui.promptSuggestions.addEventListener('click', (e) => {
+        if (e.target.classList.contains('prompt-button')) {
+            const promptText = e.target.textContent;
+            ui.chatInput.value = promptText;
+            ui.chatForm.requestSubmit();
+        }
+    });
+
     // Data card listeners
-    const interactiveCards = document.querySelectorAll('.data-card[data-metric]');
+    const interactiveCards = document.querySelectorAll('[data-metric]');
     interactiveCards.forEach(card => {
-        card.addEventListener('click', () => {
-            const metric = card.dataset.metric;
-            const title = card.dataset.title;
-            showHistoryModal(metric, title);
+        card.addEventListener('click', (event) => {
+            const metricTarget = event.target.closest('[data-metric]');
+            if (metricTarget) {
+                 const metric = metricTarget.dataset.metric;
+                 const title = metricTarget.dataset.title;
+                 showHistoryModal(metric, title);
+            }
         });
     });
     
     // Graph card listener
     ui.chartCard.addEventListener('click', showGraphModal);
+
+    // About nav listener
+    ui.aboutNavBtn.addEventListener('click', showAboutModal);
 
     // Modal close listeners
     ui.modalCloseBtn.addEventListener('click', hideHistoryModal);
@@ -346,6 +453,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.graphModalCloseBtn.addEventListener('click', hideGraphModal);
     ui.graphModalOverlay.addEventListener('click', (e) => {
         if (e.target === ui.graphModalOverlay) hideGraphModal();
+    });
+    ui.aboutModalCloseBtn.addEventListener('click', hideAboutModal);
+    ui.aboutModalOverlay.addEventListener('click', (e) => {
+        if (e.target === ui.aboutModalOverlay) hideAboutModal();
     });
 });
 
