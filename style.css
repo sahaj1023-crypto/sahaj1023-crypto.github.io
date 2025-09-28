@@ -9,59 +9,58 @@
     --accent-green-start: #10b981;
     --accent-green-end: #34d399;
 
-    /* NEW: Poppy Graph Line Colors from Palette */
-    --graph-line-1: #a3e635; /* Vibrant Lime Green */
-    --graph-line-2: #d946ef; /* Vibrant Fuchsia */
-
+    /* --- NEW: Vibrant Graph Colors --- */
+    --graph-line-1: #00f6ff; /* Neon Cyan */
+    --graph-line-2: #d946ef; /* Electric Purple/Fuchsia */
+    --grid-line-color: rgba(100, 116, 139, 0.25); /* A slightly more visible grid line */
 
     /* Default to Dark Mode */
     --background-start: #020617;
     --background-end: #111827;
-    --background-glow: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
-    --card-bg: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(30, 41, 59, 0.7));
-    --card-border: rgba(55, 65, 81, 0.5);
-    --card-shadow: rgba(0,0,0,0.35);
-    --card-shadow-hover: rgba(0,0,0,0.6);
+    --background-glow: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+    --card-bg: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.6));
+    --card-border: rgba(55, 65, 81, 0.4);
+    --card-shadow: rgba(0,0,0,0.3);
+    --card-shadow-hover: rgba(0,0,0,0.5);
     --text-primary: #e5e7eb;
     --text-secondary: #9ca3af;
     --text-title: #64748b;
-    --text-shadow: rgba(0, 0, 0, 0.25);
-    --grid-line-color: rgba(55, 65, 81, 0.6);
+    --text-shadow: rgba(0, 0, 0, 0.2);
     --chat-input-bg: #374151;
     --chat-input-border: #4b5563;
     --chat-ai-bg: rgba(6, 182, 212, 0.1);
     --chat-user-bg: rgba(55, 65, 81, 1);
-    --chat-user-border: #4b5563;
     --toggle-bg: linear-gradient(135deg, #374151, #1f2937);
     --toggle-border: #4b5563;
     --toggle-thumb-bg: var(--accent-cyan);
     --table-row-hover-bg: rgba(255, 255, 255, 0.05);
     --nav-button-bg-hover: rgba(255, 255, 255, 0.1);
+    --modal-shadow-glow: var(--accent-cyan);
 }
 
 body.light-mode {
     --background-start: #f1f5f9;
     --background-end: #e2e8f0;
-    --background-glow: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
-    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(241, 245, 249, 0.9));
-    --card-border: rgba(203, 213, 225, 0.9);
-    --card-shadow: rgba(99, 102, 241, 0.15);
-    --card-shadow-hover: rgba(99, 102, 241, 0.25);
+    --background-glow: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(241, 245, 249, 0.8));
+    --card-border: rgba(203, 213, 225, 0.8);
+    --card-shadow: rgba(99, 102, 241, 0.1);
+    --card-shadow-hover: rgba(99, 102, 241, 0.2);
     --text-primary: #1e293b;
     --text-secondary: #475569;
     --text-title: #94a3b8;
     --text-shadow: rgba(0, 0, 0, 0.1);
-    --grid-line-color: rgba(203, 213, 225, 0.7);
+    --grid-line-color: rgba(148, 163, 184, 0.3);
     --chat-input-bg: #f8fafc;
     --chat-input-border: #e2e8f0;
     --chat-ai-bg: #ecfeff;
-    --chat-user-bg: #ede9fe; /* Light Violet for User Chat */
-    --chat-user-border: #c4b5fd; /* Stronger Border for User Chat */
+    --chat-user-bg: #f5f3ff;
     --toggle-bg: linear-gradient(135deg, #e2e8f0, #cbd5e1);
     --toggle-border: #cbd5e1;
     --toggle-thumb-bg: var(--accent-purple);
     --table-row-hover-bg: rgba(0, 0, 0, 0.03);
     --nav-button-bg-hover: rgba(0, 0, 0, 0.05);
+    --modal-shadow-glow: var(--accent-purple);
 }
 
 body {
@@ -89,7 +88,7 @@ body {
         display: grid;
         grid-template-columns: 1fr 2fr; /* Asymmetrical columns */
         gap: 2rem;
-        align-items: stretch; 
+        align-items: stretch; /* Make columns equal height */
     }
     .left-column {
         display: flex;
@@ -103,7 +102,7 @@ body {
     background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 25px rgba(139, 92, 246, 0.4), 0 2px 5px rgba(0,0,0,0.2);
+    text-shadow: 0 2px 20px rgba(139, 92, 246, 0.3);
 }
 
 /* New Nav Button Style */
@@ -135,14 +134,13 @@ body {
                 border-color 0.4s ease,
                 background 0.4s ease;
     box-shadow: 0 4px 20px var(--card-shadow), 
-                inset 0 1px 2px rgba(255,255,255,0.05),
-                inset 0 0 15px rgba(0,0,0,0.25);
+                inset 0 1px 2px rgba(255,255,255,0.05);
     position: relative;
     overflow: hidden;
     transform-style: preserve-3d;
     display: flex;
     flex-direction: column;
-    border-radius: 1.5rem; 
+    border-radius: 1.5rem; /* Softer rounded corners */
 }
 
 .data-card::before {
@@ -166,15 +164,14 @@ body {
     box-shadow: 0 15px 35px var(--card-shadow-hover), 
                 0 0 20px var(--accent-cyan), 
                 0 0 40px var(--accent-purple), 
-                inset 0 1px 2px rgba(255,255,255,0.05),
-                inset 0 0 15px rgba(0,0,0,0.25);
+                inset 0 1px 2px rgba(255,255,255,0.05);
     border-color: var(--accent-cyan);
 }
 
 /* --- Dynamic Aura for Limit Card --- */
 #limit-card.aura-low:hover {
     transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-green-start), 0 0 40px var(--accent-green-end), inset 0 1px 2px rgba(255,255,255,0.05), inset 0 0 15px rgba(0,0,0,0.25);
+    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-green-start), 0 0 40px var(--accent-green-end), inset 0 1px 2px rgba(255,255,255,0.05);
     border-color: var(--accent-green-start);
 }
 #limit-card.aura-low:hover::before {
@@ -183,7 +180,7 @@ body {
 
 #limit-card.aura-medium:hover {
     transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-yellow-start), 0 0 40px var(--accent-yellow-end), inset 0 1px 2px rgba(255,255,255,0.05), inset 0 0 15px rgba(0,0,0,0.25);
+    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-yellow-start), 0 0 40px var(--accent-yellow-end), inset 0 1px 2px rgba(255,255,255,0.05);
     border-color: var(--accent-yellow-start);
 }
 #limit-card.aura-medium:hover::before {
@@ -192,7 +189,7 @@ body {
 
 #limit-card.aura-high:hover {
     transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-red-start), 0 0 40px var(--accent-red-end), inset 0 1px 2px rgba(255,255,255,0.05), inset 0 0 15px rgba(0,0,0,0.25);
+    box-shadow: 0 10px 25px var(--card-shadow-hover), 0 0 20px var(--accent-red-start), 0 0 40px var(--accent-red-end), inset 0 1px 2px rgba(255,255,255,0.05);
     border-color: var(--accent-red-start);
 }
 #limit-card.aura-high:hover::before {
@@ -213,7 +210,7 @@ body {
     color: var(--text-primary);
     line-height: 1;
     transition: transform 0.3s ease, text-shadow 0.3s ease;
-    text-shadow: 0 2px 10px var(--text-shadow), 0 0 15px rgba(255, 255, 255, 0.1);
+    text-shadow: 0 2px 10px var(--text-shadow);
 }
 .metric-unit, .metric-unit-small {
     font-weight: 500;
@@ -224,9 +221,8 @@ body {
 .left-column .data-card {
     flex-grow: 1; /* Allow cards to grow equally */
 }
-.left-column .metric-display .metric-value { font-size: clamp(2rem, 6vw, 3.5rem); }
-.left-column .metric-display .metric-unit { font-size: clamp(0.9rem, 2.5vw, 1.1rem); }
-
+.left-column .metric-value { font-size: clamp(2.5rem, 5vw, 3.5rem); }
+.left-column .metric-unit { font-size: clamp(1rem, 2vw, 1.125rem); }
 
 /* Bottom row cards */
 .metric-display-small .metric-value { font-size: clamp(2rem, 8vw, 3.5rem); }
@@ -234,7 +230,7 @@ body {
 
 .data-card[data-metric]:hover .metric-value { 
     transform: scale(1.05); 
-    text-shadow: 0 0 8px var(--accent-cyan), 0 0 20px var(--accent-purple), 0 2px 10px var(--text-shadow), 0 0 25px rgba(255, 255, 255, 0.2); 
+    text-shadow: 0 0 8px var(--accent-cyan), 0 0 20px var(--accent-purple), 0 2px 10px var(--text-shadow); 
 }
 
 .card-title {
@@ -314,7 +310,7 @@ body {
 }
 .chat-user {
     background-color: var(--chat-user-bg);
-    border: 1px solid var(--chat-user-border);
+    border: 1px solid var(--chat-input-border);
     transition: background-color 0.5s ease, border-color 0.5s ease;
     border-radius: 1rem;
 }
@@ -430,7 +426,7 @@ body {
     background: var(--card-bg); 
     border: 1px solid var(--card-border); 
     border-radius: 1.5rem; 
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--card-border), 0 0 30px var(--accent-purple); 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--card-border), 0 0 20px var(--modal-shadow-glow); 
     width: 90%; max-width: 500px; max-height: 80vh; 
     display: flex; flex-direction: column; 
     transform: scale(0.95); 
@@ -468,6 +464,14 @@ body {
 .data-card[data-metric], #chart-card, #about-nav-btn { cursor: pointer; }
 
 /* Canvas must be positioned to fill the flexible modal body */
+#chart-card .chart-container {
+    flex-grow: 1;
+    position: relative;
+    min-height: 300px;
+}
+#chart-card {
+    justify-content: flex-start;
+}
 .modal-body canvas {
     position: absolute;
     top: 0; left: 0;
@@ -550,25 +554,28 @@ body.light-mode .toggle-thumb .sun-icon { opacity: 0; transform: scale(0) rotate
     z-index: 5000;
     padding: 2rem;
     background: var(--background-end);
+    /* Animation */
+    transform-origin: var(--og-left) var(--og-top);
+    animation: expand-chat 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+@keyframes expand-chat {
+    from {
+        clip-path: circle(0% at var(--og-left) var(--og-top));
+    }
+    to {
+        clip-path: circle(150% at var(--og-left) var(--og-top));
+    }
+}
+
+
 #chat-card.chat-fullscreen .fullscreen-button .minimize-icon { display: block; }
 #chat-card.chat-fullscreen .fullscreen-button .expand-icon { display: none; }
 
-/* FIX: This selector correctly hides the dashboard when chat is fullscreen */
-body.chat-fullscreen-active > #main-content > #main-header,
-body.chat-fullscreen-active > #main-content > #dashboard-layout {
-    visibility: hidden;
+body.chat-fullscreen-active > #main-content {
+   visibility: hidden;
 }
 
 body.chat-fullscreen-active {
     overflow: hidden;
 }
-
-.chart-container {
-    flex-grow: 1;
-    position: relative;
-}
-#chart-card {
-    justify-content: flex-start;
-}
-

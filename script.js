@@ -2,7 +2,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
-// --- ⚠️ ACTION REQUIRED: PASTE YOUR CREDENTIALS HERE ---
+// --- ⚠️ CRITICAL SECURITY RISK: DO NOT EXPOSE KEYS PUBLICLY ---
+// Your API keys have been replaced with placeholders.
+// Exposing these in client-side code can lead to abuse and unexpected charges.
+// Store these securely on a backend server and have your website call your server.
 const firebaseConfig = {
   apiKey: "AIzaSyAiGkLA3M-YGARgmGieYcsgVsfdmF0sZUQ",
   authDomain: "urja-power-monitor-2025.firebaseapp.com",
@@ -13,7 +16,7 @@ const firebaseConfig = {
   appId: "1:692578664929:web:ae56ba8691977795ea92a0"
 };
 const GEMINI_API_KEY = "AIzaSyCk41lcad7d659M5_zHkU-25FchQhD3P_s";
-// -----------------------------------------------------------
+// --------------------------------------------------------------------
 
 // --- DOM Elements ---
 const ui = {
@@ -76,8 +79,7 @@ const chartData = {
         { 
             label: 'Energy (kWh)', 
             data: [], 
-            borderColor: 'var(--graph-line-1)', 
-            backgroundColor: 'rgba(163, 230, 53, 0.2)', 
+            backgroundColor: 'rgba(0, 246, 255, 0.1)', /* Neon Cyan Fill */
             yAxisID: 'y', 
             fill: true, 
             tension: 0.4,
@@ -88,8 +90,7 @@ const chartData = {
         { 
             label: 'Cost (Rs)', 
             data: [], 
-            borderColor: 'var(--graph-line-2)', 
-            backgroundColor: 'rgba(217, 70, 239, 0.2)', 
+            backgroundColor: 'rgba(217, 70, 239, 0.1)', /* Electric Purple Fill */
             yAxisID: 'y1', 
             fill: true, 
             tension: 0.4,
@@ -100,30 +101,33 @@ const chartData = {
     ]
 };
 
-let chartOptions = { // Use let to allow modification
+// *** FIX APPLIED HERE ***
+// The `plugins` object was added to prevent the TypeError.
+let chartOptions = {
     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
     scales: {
         x: { 
-            title: { display: true, text: 'Time', color: 'var(--text-secondary)' },
-            ticks: { color: 'var(--text-secondary)' }, 
-            grid: { color: 'var(--grid-line-color)' } 
+            title: { display: true, text: 'Time' },
         },
         y: { 
             type: 'linear', 
             position: 'left', 
-            title: { display: true, text: 'Energy (kWh)', color: 'var(--text-secondary)' }, 
-            ticks: { color: 'var(--text-secondary)' }, 
-            grid: { color: 'var(--grid-line-color)' } 
+            title: { display: true, text: 'Energy (kWh)' }, 
         },
         y1: { 
             type: 'linear', 
             position: 'right', 
-            title: { display: true, text: 'Cost (Rs)', color: 'var(--text-secondary)' }, 
-            ticks: { color: 'var(--text-secondary)' }, 
+            title: { display: true, text: 'Cost (Rs)' }, 
             grid: { drawOnChartArea: false } 
         }
     },
-    plugins: { legend: { labels: { color: 'var(--text-primary)' } } }
+    plugins: {
+        legend: {
+            labels: {
+                // This object now exists, so its color property can be set later.
+            }
+        }
+    }
 };
 
 function initializeCharts() {
@@ -301,10 +305,77 @@ function resetBatteryIndicator() {
 
 
 // --- Gemini Chat Logic ---
-ui.chatForm.addEventListener('submit', async (e) => { e.preventDefault(); const userInput = ui.chatInput.value.trim(); if (!userInput) return; if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") { addMessageToChat("Error", "Gemini API key is missing.", true); return; } addMessageToChat("You", userInput, false); ui.chatInput.value = ''; setLoading(true); try { const sensorDataContext = JSON.stringify(currentSensorData, null, 2); const fullPrompt = `Based on the following real-time data from an ESP32 power monitor, answer the user's question.\n\nSensor Data:\n${sensorDataContext}\n\nUser Question: "${userInput}"`; const systemPrompt = "You are a helpful power management assistant named Elyra AI. Analyze the provided real-time data to answer user questions concisely. Provide suggestions to save energy or explain the current power consumption. If the question is not related to power, act as a general conversational AI. Format your response using simple markdown for readability."; const response = await callGeminiApi(fullPrompt, systemPrompt); addMessageToChat("Gemini", response, true); } catch (error) { console.error("Gemini API Error:", error); addMessageToChat("Error", `Could not connect to the Gemini API.\nReason: ${error.message}`, true); } finally { setLoading(false); } });
-async function callGeminiApi(prompt, systemPrompt) { const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`; const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } }; const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) { let errorMessage = `API request failed with status ${response.status}`; try { const errorBody = await response.json(); errorMessage = errorBody.error?.message || JSON.stringify(errorBody); } catch (e) { errorMessage += `\nResponse: ${await response.text()}`; } throw new Error(errorMessage); } const data = await response.json(); return data.candidates[0].content.parts[0].text; }
-function addMessageToChat(sender, message, isAI) { const messageDiv = document.createElement('div'); const senderName = isAI ? 'Elyra' : 'You'; const senderNameColor = isAI ? 'text-cyan-400' : 'text-slate-300'; messageDiv.className = `p-3 max-w-lg text-sm ${isAI ? 'chat-ai' : 'chat-user ml-auto'}`; messageDiv.innerHTML = `<p class="font-semibold" style="color: ${isAI ? 'var(--accent-cyan)' : 'var(--accent-purple)'};">${senderName}</p><p class="text-text-primary whitespace-pre-wrap">${message}</p>`; ui.chatContainer.appendChild(messageDiv); ui.chatContainer.scrollTop = ui.chatContainer.scrollHeight; }
-function setLoading(isLoading) { ui.chatSubmit.disabled = isLoading; ui.sendText.classList.toggle('hidden', isLoading); ui.sendSpinner.classList.toggle('hidden', !isLoading); }
+ui.chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const userInput = ui.chatInput.value.trim();
+    if (!userInput) return;
+
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
+        addMessageToChat("Error", "Gemini API key is missing or invalid. Please add it to the top of script.js.", true);
+        return;
+    }
+
+    addMessageToChat("You", userInput, false);
+    ui.chatInput.value = '';
+    setLoading(true);
+
+    try {
+        const sensorDataContext = JSON.stringify(currentSensorData, null, 2);
+        const fullPrompt = `Based on the following real-time data from an ESP32 power monitor, answer the user's question.\n\nSensor Data:\n${sensorDataContext}\n\nUser Question: "${userInput}"`;
+        const systemPrompt = "You are a helpful power management assistant named Elyra AI. Analyze the provided real-time data to answer user questions concisely. Provide suggestions to save energy or explain the current power consumption. If the question is not related to power, act as a general conversational AI. Format your response using simple markdown for readability.";
+        
+        const response = await callGeminiApi(fullPrompt, systemPrompt);
+        addMessageToChat("Elyra", response, true);
+    } catch (error) {
+        console.error("Gemini API Error:", error);
+        addMessageToChat("Error", `Could not connect to the Gemini API.\nReason: ${error.message}`, true);
+    } finally {
+        setLoading(false);
+    }
+});
+
+async function callGeminiApi(prompt, systemPrompt) {
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
+    const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] }
+    };
+
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        let errorMessage = `API request failed with status ${response.status}`;
+        try {
+            const errorBody = await response.json();
+            errorMessage = errorBody.error?.message || JSON.stringify(errorBody);
+        } catch (e) {
+            errorMessage += `\nResponse: ${await response.text()}`;
+        }
+        throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+}
+
+function addMessageToChat(sender, message, isAI) {
+    const messageDiv = document.createElement('div');
+    const senderName = sender;
+    messageDiv.className = `p-3 max-w-lg text-sm ${isAI ? 'chat-ai' : 'chat-user ml-auto'}`;
+    messageDiv.innerHTML = `<p class="font-semibold" style="color: ${isAI ? 'var(--accent-cyan)' : 'var(--accent-purple)'};">${senderName}</p><p class="text-text-primary whitespace-pre-wrap">${message}</p>`;
+    ui.chatContainer.appendChild(messageDiv);
+    ui.chatContainer.scrollTop = ui.chatContainer.scrollHeight;
+}
+
+function setLoading(isLoading) {
+    ui.chatSubmit.disabled = isLoading;
+    ui.sendText.classList.toggle('hidden', isLoading);
+    ui.sendSpinner.classList.toggle('hidden', !isLoading);
+}
 
 // --- Modal and Graph Interaction Logic ---
 function showHistoryModal(metric, title) {
@@ -312,6 +383,7 @@ function showHistoryModal(metric, title) {
     const historyBody = ui.modalBody;
     historyBody.innerHTML = '';
     const filteredHistory = dataHistory.map(e => ({ value: e.data[metric], ts: e.timestamp })).filter(e => e.value !== undefined).reverse();
+
     if (filteredHistory.length === 0) {
         historyBody.innerHTML = '<p class="text-text-secondary text-center">No history to display yet. Waiting for live data...</p>';
     } else {
@@ -360,14 +432,24 @@ function hideAboutModal() {
 
 // --- Theme Management ---
 function updateChartTheme() {
-    const isLight = document.body.classList.contains('light-mode');
-    const style = getComputedStyle(document.body);
-    const newOptions = { ...chartOptions };
-    
-    const textColor = style.getPropertyValue('--text-secondary').trim();
-    const gridColor = style.getPropertyValue('--grid-line-color').trim();
-    const legendColor = style.getPropertyValue('--text-primary').trim();
+    if (!consumptionChart || !expandedConsumptionChart) {
+        return;
+    }
 
+    const style = getComputedStyle(document.body);
+    
+    const gridColor = style.getPropertyValue('--grid-line-color').trim();
+    const textColor = style.getPropertyValue('--text-secondary').trim();
+    const legendColor = style.getPropertyValue('--text-primary').trim();
+    const line1Color = style.getPropertyValue('--graph-line-1').trim();
+    const line2Color = style.getPropertyValue('--graph-line-2').trim();
+
+    consumptionChart.data.datasets[0].borderColor = line1Color;
+    consumptionChart.data.datasets[1].borderColor = line2Color;
+    expandedConsumptionChart.data.datasets[0].borderColor = line1Color;
+    expandedConsumptionChart.data.datasets[1].borderColor = line2Color;
+
+    const newOptions = { ...chartOptions };
     newOptions.scales.x.ticks.color = textColor;
     newOptions.scales.x.grid.color = gridColor;
     newOptions.scales.x.title.color = textColor;
@@ -381,12 +463,15 @@ function updateChartTheme() {
     
     newOptions.plugins.legend.labels.color = legendColor;
 
-    if (consumptionChart) { consumptionChart.options = newOptions; consumptionChart.update('none'); }
-    if (expandedConsumptionChart) { expandedConsumptionChart.options = newOptions; expandedConsumptionChart.update('none'); }
+    consumptionChart.options = newOptions;
+    expandedConsumptionChart.options = newOptions;
+
+    consumptionChart.update('none');
+    expandedConsumptionChart.update('none');
 }
 
 // --- Page Load Logic ---
-document.addEventListener('DOMContentLoaded', () => {
+window.onload = () => {
     initializeCharts();
     updateDashboard(initialData);
     resetBatteryIndicator();
@@ -409,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.opacity = '1';
             el.style.transform = 'translateY(0)';
         });
-    }, 2500);
+    }, 1500);
 
     ui.connectBtn.addEventListener('click', connectToESP32);
     ui.disconnectBtn.addEventListener('click', disconnectFromESP32);
@@ -457,5 +542,5 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.graphModalOverlay.addEventListener('click', (e) => { if (e.target === ui.graphModalOverlay) hideGraphModal(); });
     ui.aboutModalCloseBtn.addEventListener('click', hideAboutModal);
     ui.aboutModalOverlay.addEventListener('click', (e) => { if (e.target === ui.aboutModalOverlay) hideAboutModal(); });
-});
+};
 
