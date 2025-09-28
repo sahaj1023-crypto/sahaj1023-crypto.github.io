@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elyra Power Monitor - Dashboard</title>
-    <!-- Basic Favicon to prevent 404 errors -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,10 +14,8 @@
 </head>
 <body class="bg-background text-text-primary">
     
-    <!-- NEW: Starfield Background Animation Canvas -->
     <canvas id="starfield"></canvas>
 
-    <!-- Loading Animation -->
     <div id="loader">
         <div class="loader-content">
             <h1 class="loader-text">ELYRA</h1>
@@ -52,13 +49,11 @@
                         <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
                         <span id="status-text" class="text-text-secondary">Disconnected</span>
                     </div>
-                    <!-- Overdrive Status -->
                     <div id="overdrive-status-indicator" class="hidden items-center gap-2">
                         <div id="overdrive-dot" class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>
                         <span id="overdrive-text" class="font-semibold text-green-400">Overdrive Active</span>
                     </div>
                 </div>
-                <!-- Connection Buttons -->
                 <div id="connection-controls" class="mt-5">
                     <button id="connect-btn" class="connect-button">
                         <span id="connect-btn-text">Connect to ESP32</span>
@@ -131,60 +126,56 @@
                 </div>
                 <p id="limit-text" class="text-sm font-semibold text-text-secondary mt-3 text-center">-.-- / -.-- kWh</p>
             </div>
-        </div>
 
-        <!-- AI Assistant Section -->
-        <section id="chat-card" class="data-card p-4 md:p-6 animated flex flex-col mt-8" style="--delay: 0.5s;">
-             <div class="flex justify-between items-center mb-3">
-                <h2 class="text-2xl font-bold text-center header-title">Elyra AI</h2>
-                <button id="chat-fullscreen-btn" class="fullscreen-button" title="Toggle fullscreen chat">
-                     <svg class="expand-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-                     <svg class="minimize-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
-                </button>
-            </div>
-            <div class="chat-main-area">
-                <div class="chat-conversation-area">
-                    <div id="chat-container" class="flex-grow overflow-y-auto mb-4 p-3 bg-background-end rounded-lg space-y-4">
-                        <div class="p-3 max-w-lg chat-ai">
-                            <p class="font-semibold" style="color: var(--accent-cyan);">Elyra</p>
-                            <p class="text-text-primary text-sm">Hello! Ask me about your power usage or for tips on saving energy!</p>
+            <!-- AI Assistant Section -->
+            <section id="chat-card" class="data-card p-4 md:p-6 animated flex flex-col mt-8" style="--delay: 0.5s;">
+                 <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-2xl font-bold text-center header-title">Elyra AI</h2>
+                    <button id="chat-fullscreen-btn" class="fullscreen-button" title="Toggle fullscreen chat">
+                         <svg class="expand-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                    </button>
+                </div>
+                <div class="chat-main-area">
+                    <div class="chat-conversation-area">
+                        <div id="chat-container" class="flex-grow overflow-y-auto mb-4 p-3 bg-background-end rounded-lg space-y-4">
+                            <div class="p-3 max-w-lg chat-ai">
+                                <p class="font-semibold" style="color: var(--accent-cyan);">Elyra</p>
+                                <p class="text-text-primary text-sm">Hello! Ask me about your power usage or for tips on saving energy!</p>
+                            </div>
+                        </div>
+                        <form id="chat-form" class="flex gap-2">
+                            <input type="text" id="chat-input" placeholder="Ask Elyra AI..." class="flex-grow bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition text-sm">
+                            <button type="submit" id="chat-submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-5 rounded-lg transition disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center">
+                                <span id="send-text">Send</span>
+                                <div id="send-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            </button>
+                        </form>
+                    </div>
+                    <div id="prompt-suggestions" class="prompt-suggestions-area">
+                        <h3 class="text-lg font-semibold text-text-secondary mb-3">What can I help with?</h3>
+                        <div class="space-y-2">
+                            <button class="prompt-button">"Summarize my current usage."</button>
+                            <button class="prompt-button">"How can I reduce my costs?"</button>
+                            <button class="prompt-button">"Explain what voltage means."</button>
+                            <button class="prompt-button">"Is my power consumption high?"</button>
                         </div>
                     </div>
-                    <form id="chat-form" class="flex gap-2">
-                        <input type="text" id="chat-input" placeholder="Ask Elyra AI..." class="flex-grow bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition text-sm">
-                        <button type="submit" id="chat-submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-5 rounded-lg transition disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center">
-                            <span id="send-text">Send</span>
-                            <div id="send-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        </button>
-                    </form>
                 </div>
-                <div id="prompt-suggestions" class="prompt-suggestions-area">
-                    <h3 class="text-lg font-semibold text-text-secondary mb-3">What can I help with?</h3>
-                    <div class="space-y-2">
-                        <button class="prompt-button">"Summarize my current usage."</button>
-                        <button class="prompt-button">"How can I reduce my costs?"</button>
-                        <button class="prompt-button">"Explain what voltage means."</button>
-                        <button class="prompt-button">"Is my power consumption high?"</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </div>
 
-    <!-- Modal for Data History -->
+    <!-- Modals -->
     <div id="history-modal-overlay" class="modal-overlay hidden">
         <div id="history-modal" class="modal-box">
             <div class="modal-header">
                 <h2 id="modal-title" class="text-xl font-bold">Data History</h2>
                 <button id="modal-close-btn" class="modal-close-button">&times;</button>
             </div>
-            <div id="modal-body" class="modal-body">
-                <!-- History content will be injected here by script.js -->
-            </div>
+            <div id="modal-body" class="modal-body"></div>
         </div>
     </div>
 
-    <!-- Modal for Expanded Graph -->
     <div id="graph-modal-overlay" class="modal-overlay hidden">
         <div id="graph-modal" class="modal-box w-full max-w-6xl h-[80vh]">
             <div class="modal-header">
@@ -197,7 +188,6 @@
         </div>
     </div>
 
-    <!-- Modal for About Elyra -->
     <div id="about-modal-overlay" class="modal-overlay hidden">
         <div id="about-modal" class="modal-box">
             <div class="modal-header">
@@ -214,6 +204,40 @@
         </div>
     </div>
 
+    <!-- FINAL FIX: New Dedicated Fullscreen Chat Container -->
+    <div id="chat-fullscreen-container" class="chat-fullscreen-container">
+        <div class="chat-fullscreen-content">
+            <div class="flex justify-between items-center mb-3 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-center header-title">Elyra AI</h2>
+                <button id="chat-minimize-btn" class="fullscreen-button" title="Minimize chat">
+                     <svg class="minimize-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+                </button>
+            </div>
+            <div class="chat-main-area">
+                <div class="chat-conversation-area">
+                    <div id="chat-container-fullscreen" class="flex-grow overflow-y-auto mb-4 p-3 bg-background-end rounded-lg space-y-4">
+                        <!-- Messages will be synced here -->
+                    </div>
+                    <form id="chat-form-fullscreen" class="flex gap-2">
+                        <input type="text" id="chat-input-fullscreen" placeholder="Ask Elyra AI..." class="flex-grow bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition text-sm">
+                        <button type="submit" id="chat-submit-fullscreen" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-5 rounded-lg transition disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center">
+                            <span id="send-text-fullscreen">Send</span>
+                            <div id="send-spinner-fullscreen" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        </button>
+                    </form>
+                </div>
+                <div id="prompt-suggestions-fullscreen" class="prompt-suggestions-area">
+                    <h3 class="text-lg font-semibold text-text-secondary mb-3">What can I help with?</h3>
+                    <div class="space-y-2">
+                        <button class="prompt-button">"Summarize my current usage."</button>
+                        <button class="prompt-button">"How can I reduce my costs?"</button>
+                        <button class="prompt-button">"Explain what voltage means."</button>
+                        <button class="prompt-button">"Is my power consumption high?"</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Firebase and App Logic -->
     <script type="module" src="script.js"></script>
