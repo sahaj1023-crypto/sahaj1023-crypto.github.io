@@ -79,7 +79,7 @@ const chartData = {
         { 
             label: 'Energy (kWh)', 
             data: [], 
-            backgroundColor: 'rgba(0, 246, 255, 0.1)', /* Neon Cyan Fill */
+            backgroundColor: 'rgba(0, 246, 255, 0.1)', // Neon Cyan Fill
             yAxisID: 'y', 
             fill: true, 
             tension: 0.4,
@@ -90,7 +90,7 @@ const chartData = {
         { 
             label: 'Cost (Rs)', 
             data: [], 
-            backgroundColor: 'rgba(217, 70, 239, 0.1)', /* Electric Purple Fill */
+            backgroundColor: 'rgba(217, 70, 239, 0.1)', // Electric Purple Fill
             yAxisID: 'y1', 
             fill: true, 
             tension: 0.4,
@@ -101,8 +101,6 @@ const chartData = {
     ]
 };
 
-// *** FIX APPLIED HERE ***
-// The `plugins` object was added to prevent the TypeError.
 let chartOptions = {
     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
     scales: {
@@ -542,5 +540,71 @@ window.onload = () => {
     ui.graphModalOverlay.addEventListener('click', (e) => { if (e.target === ui.graphModalOverlay) hideGraphModal(); });
     ui.aboutModalCloseBtn.addEventListener('click', hideAboutModal);
     ui.aboutModalOverlay.addEventListener('click', (e) => { if (e.target === ui.aboutModalOverlay) hideAboutModal(); });
+
+    // --- NEW: Starfield Background Animation ---
+    const starfieldCanvas = document.getElementById('starfield');
+    if (starfieldCanvas) {
+        const ctx = starfieldCanvas.getContext('2d');
+        let stars = [];
+        let numStars = 200;
+
+        function setCanvasSize() {
+            starfieldCanvas.width = window.innerWidth;
+            starfieldCanvas.height = window.innerHeight;
+        }
+
+        function createStars() {
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * starfieldCanvas.width,
+                    y: Math.random() * starfieldCanvas.height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.2 + 0.1,
+                    twinkleSpeed: Math.random() * 0.015 + 0.005
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, starfieldCanvas.width, starfieldCanvas.height);
+            for (let i = 0; i < numStars; i++) {
+                const star = stars[i];
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                
+                // Pulsating effect for twinkling
+                star.alpha += star.twinkleSpeed;
+                if (star.alpha > 1 || star.alpha < 0) {
+                    star.twinkleSpeed = -star.twinkleSpeed;
+                }
+                
+                ctx.fillStyle = `rgba(229, 231, 235, ${star.alpha * 0.7})`; // Uses text-primary color
+                ctx.fill();
+
+                // Move star
+                star.y += star.speed;
+                if (star.y > starfieldCanvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * starfieldCanvas.width;
+                }
+            }
+        }
+
+        function animateStarfield() {
+            drawStars();
+            requestAnimationFrame(animateStarfield);
+        }
+
+        window.addEventListener('resize', () => {
+            setCanvasSize();
+            createStars();
+        });
+
+        setCanvasSize();
+        createStars();
+        animateStarfield();
+    }
 };
 
